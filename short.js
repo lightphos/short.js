@@ -45,3 +45,13 @@ export function shadow(content) {
         short.render(content);
     })
 }
+
+export function link({ link, children, clazz }) {
+    return (
+        `
+            <a href="${link}" class="${clazz}">
+                ${children}
+            </a>
+        `
+    );
+}

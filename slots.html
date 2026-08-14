@@ -8,6 +8,7 @@
 
   <script type="module">
     import { shadow } from './short.js';
+    import { header } from './app/header.js';
 
     function btn() {
         return "<button onclick=\"alert('Button clicked!')\">Click Me</button>"
@@ -21,6 +22,8 @@
 
     function component() {
         return (
+            header({ children: "App Heading" }) +
+            
             txt("Short 1") + btn() + txt("Short 2")
         )
     }   
