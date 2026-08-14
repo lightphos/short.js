@@ -3,11 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <title>Slots and Shadow DOM</title>
-  <script src="./short.js"></script>
 </head>
 <body>
 
-  <script>
+  <script type="module">
+    import { shadow } from './short.js';
 
     function btn() {
         return "<button onclick=\"alert('Button clicked!')\">Click Me</button>"
@@ -25,7 +25,7 @@
         )
     }   
 
-    short(component())
+    shadow(component())
   </script>
 </body>
 </html>

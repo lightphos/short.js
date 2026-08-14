@@ -1,33 +1,20 @@
-
 <html>
 <head>
     <meta charset="UTF-8">
     <title>Short Div Example</title>
-    <script src="./short.js"></script>
+    <style src="./short.css"></style>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
 </head>
 
-<body>
+<body class="bg-gray-100 p-8">
+</body>
 
-<script>
+<script type="module">
+    import { shorten } from './short.js';
+    import { app } from './app/app.js';
 
-    function btn() {
-        return "<button onclick=\"alert('Button clicked!')\">Click Me</button>"
-    }
-
-    function txt(text) {
-      return (
-        "<h1 id='short-title'>" + text + "</h1>" 
-      )
-    }
-
-    function component() {
-        return (
-            txt("Short 1") + btn() + txt("Short 2")
-        )
-    }   
-
-    render(component()); // Call the function with the desired content
+    shorten(app());
 </script>
 
-</body>
 </html>
+

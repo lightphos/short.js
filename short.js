@@ -1,5 +1,5 @@
 
-function render(content) {
+export function shorten(content) {
     document.addEventListener('DOMContentLoaded', () => {
     const div = document.createElement('div');
     div.id = 'short-content';
@@ -32,7 +32,7 @@ class Short extends HTMLElement {
     }
 }
 
-function short(content) {
+export function shadow(content) {
     document.addEventListener('DOMContentLoaded', () => {
 
         const el = document.createElement('short-app');
