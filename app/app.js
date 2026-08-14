@@ -4,7 +4,7 @@ import { content } from './content.js';
 
 export function app() { 
     return (
-        header({ children: "App Heading" }) +
+        header({ children: "Short.JS" }) +
         content({ children: "Content" }) +
         footer({ children: "App Footer" })   
     );
