@@ -9,7 +9,24 @@
 <body>
 
 <script>
-    render("This short in action"); // Call the function with the desired content
+
+    function btn() {
+        return "<button onclick=\"alert('Button clicked!')\">Click Me</button>"
+    }
+
+    function txt(text) {
+      return (
+        "<h1 id='short-title'>" + text + "</h1>" 
+      )
+    }
+
+    function component() {
+        return (
+            txt("Short 1") + btn() + txt("Short 2")
+        )
+    }   
+
+    render(component()); // Call the function with the desired content
 </script>
 
 </body>
