@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Slots and Shadow DOM</title>
+  <script src="./short.js"></script>
+</head>
+<body>
+
+  <script>
+
+    function btn() {
+        return "<button onclick=\"alert('Button clicked!')\">Click Me</button>"
+    }
+
+    function text(text) {
+      return (
+        "<h1 id='short-title'>" + text + "</h1>" 
+      )
+    }
+
+    function component() {
+        return (
+            text("Short 1") + btn() + text("Short 2")
+        )
+    }   
+
+    short(component())
+  </script>
+</body>
+</html>
