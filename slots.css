@@ -1,4 +1,6 @@
-/* ========== Host (the <my-card> element) ========== */
+/* Shadow styles */
+
+/* ========== Host (the <short-app> element) ========== */
 :host {
   display: block;
   border: 2px solid #afa8a8;
@@ -45,3 +47,9 @@ slot:not([name]) {
 #short {
   background-color: #c37676;
 }
+
+/* top level short div app id */
+
+/* #short-app {
+  background-color: blue;
+} */

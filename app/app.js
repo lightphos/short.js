@@ -4,8 +4,8 @@ import { content } from './content.js';
 
 export function app() { 
     return (
-        header({ children: "Short.JS" }) +
-        content({ children: "Content" }) +
-        footer({ children: "App Footer" })   
+        header({ txt: "Short.JS" }) +
+        content({ txt: "Contact Form" }) +
+        footer({ txt: "App Footer" })   
     );
 }

@@ -8,6 +8,7 @@ A lightweight JavaScript library for building modular web components using Shado
 - **Shadow DOM**: Encapsulated styles to prevent CSS collisions.
 - **Lightweight**: Minimal footprint for fast loading.
 - **Template-driven**: Simple API for rendering dynamic content.
+- **Helper Utilities**: Convenience functions for common DOM operations.
 
 ## Installation
 
@@ -19,44 +20,72 @@ You can include `short.js` directly in your HTML file:
 
 ## Usage
 
-### Using the `shorten` function
+### Using the `fix` function
 
-The `shorten` function injects a `div` with the specified content into the document body.
+The `fix` function injects a `div` with id `short-app` the specified content into the document body.
 
 ```javascript
-import { shorten } from './short.js';
+import { fix } from './short.js';
 
-shorten('<h1>Hello, World!</h1>');
+fix('<h1>Hello, World!</h1>');
 ```
 
-### Using the `shadow` function
+### Using the `sfix` function
 
-The `shadow` function creates a custom element `<short-app>` and renders the provided content inside its Shadow DOM.
+The `sfix` function creates a custom element `<short-app>` and renders the provided content inside its Shadow DOM.
 
 ```javascript
-import { shadow } from './short.js';
+import { sfix } from './short.js';
 
-shadow('<p>This is rendered inside a Shadow DOM.</p>');
+sfix('<p>This is rendered inside a Shadow DOM.</p>');
 ```
 
-### The `link` utility
+### Helper Utilities
 
-A helper function for generating styled anchor tags.
+short.js includes several helper functions for common DOM operations:
+
+#### `lnk({ ref, txt, cls })`
+
+Generates a styled anchor tag.
 
 ```javascript
-import { link } from './short.js';
+import { lnk } from './short.js';
 
-const myLink = link({ 
-  link: 'https://example.com', 
-  children: 'Click Me', 
-  clazz: 'y-custom-class' 
+const example = lnk({ 
+  ref: 'https://example.com', 
+  txt: 'Click Me', 
+  cls: 'text-blue-600' 
 });
+```
+
+#### `btn({ txt, cls, clk })`
+
+Generates a clickable button element.
+
+```javascript
+import { btn } from './short.js';
+
+const example = btn({ 
+  txt: 'Submit', 
+  cls: 'bg-blue-600 hover:bg-blue-700', 
+  clk: 'handleSubmit()' 
+});
+```
+
+#### `txt(txts)`
+
+Returns the provided text content.
+
+```javascript
+import { txt } from './short.js';
+
+const example = txt('Hello, World!');
 ```
 
 ## Project Structure
 
-- `short.js`: Core library.
-- `app/`: Contains application-specific components and logic.
+- `short.js`: Core library with helper utilities (`fix`, `sfix`, `lnk`, `btn`, `txt`).
+- `app/`: Contains application-specific components and logic (`app.js`, `header.js`, `footer.js`, `content.js`).
 - `index.html`: Example implementation.
 - `slots.css` / `slots.html`: Example usage of slots and CSS.
 

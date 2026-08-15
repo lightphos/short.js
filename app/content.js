@@ -1,9 +1,9 @@
-export function content({ children }) {
+export function content({ txt }) {
     return (
         `<div class="mt-2 mb-2">
 <form class="w-full max-w-md bg-white rounded-2xl shadow-lg p-8 space-y-6">
       
-      <h2 class="text-2xl font-bold text-gray-800 text-center">Contact Us</h2>
+      <h2 class="text-2xl font-bold text-gray-800 text-center">${txt}</h2>
 
       <!-- Name -->
       <div>

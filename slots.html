@@ -7,28 +7,20 @@
 <body>
 
   <script type="module">
-    import { shadow } from './short.js';
+    import * as sh  from './short.js';
     import { header } from './app/header.js';
-
-    function btn() {
-        return "<button onclick=\"alert('Button clicked!')\">Click Me</button>"
-    }
-
-    function txt(text) {
-      return (
-        "<h1 id='short-title'>" + text + "</h1>" 
-      )
-    }
 
     function component() {
         return (
-            header({ children: "Short.JS" }) +
+            header({ txt: "Short.JS" }) +
             
-            txt("Short 1") + btn() + txt("Short 2")
+            sh.txt("<h1>Short 1</h1>") + 
+            sh.btn({txt:"Click", clk:"alert('click')"}) + 
+            sh.txt("<h2>Short 2</h2>")
         )
     }   
 
-    shadow(component())
+    sh.sfix(component(), './slots.css')
   </script>
 </body>
 </html>
