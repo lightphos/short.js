@@ -1,3 +1,5 @@
+import { sh } from '../short-api.js';
+
 export function content({ txt }) {
     return (
         `<div class="mt-2 mb-2">
@@ -76,7 +78,16 @@ export function content({ txt }) {
         Send Message
       </button>
 
+      ${sh.btn({txt:"Click", clk:"alert('click')"})}
+
     </form>
-        </div>`
+
+    <form class="mt-3 w-full max-w-md bg-white rounded-2xl shadow-lg p-8 space-y-6">
+      <h2 class="text-2xl font-bold text-gray-800 text-center">Another</h2>
+      <p>${sh.inp({lbl: 'Username', ph: 'username'})}</p>
+      <p>${sh.inp({lbl: 'Password', ph: 'password', ty: 'password'})}</p>
+      ${sh.btn({txt: 'submit'})}
+    </form>
+    </div>`
     );
 }

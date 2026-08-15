@@ -68,12 +68,32 @@ export function lnk({ ref, txt, cls }) {
 
 export function btn( {txt, cls, clk}) {
     return (
-        `<button onClick="${clk}" class="${cls}">${txt}</button>`
+        `<button type="submit" onClick="${clk}" class="${cls}">${txt}</button>`
     )
 }
 
 export function txt(txts) {
     return txts;
+}
+
+export function inp({ lbl = null, ph = null, ty = 'text' }) {
+  var str = ' <input type="'+ty+'" '
+  if (lbl) {
+    str = '<label>' + lbl + str
+  }
+  if (ph) {
+    str += ' placeholder = "'.concat(ph).concat('"')    
+  }
+
+  str += ' />';
+  if (lbl) {
+    str += '</label>';
+  }
+
+  return (
+    str
+  )
+  
 }
 
 
