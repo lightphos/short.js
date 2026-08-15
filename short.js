@@ -1,10 +1,10 @@
-
 export function fix(content) {
     document.addEventListener('DOMContentLoaded', () => {
-    const div = document.createElement('div');
-    div.id = 'short-app';
-    div.innerHTML = content; 
-    document.body.appendChild(div);
+        const div = document.createElement('div');
+        div.id = 'short-app';
+        div.innerHTML = content; 
+        document.body.appendChild(div);
+        console.log("Fixed " + Object.keys(this));
     }); 
 }
 
