@@ -11,6 +11,8 @@
         <usr></usr>
         <pwd></pwd>
         <sub></sub>
+
+        <button>Sign Up</button>
     <!-- <p>${sh.lnk({ref:"/pg/signup", txt:"sign up"})}</p> -->
     </form>
     <form class="frm-sh">

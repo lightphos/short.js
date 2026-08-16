@@ -1,7 +1,9 @@
 {
   "type": "module",
   "scripts": {
-    "build:st": "node cmp/cmp.mjs"
+    "build:st": "node cmp/cmp.mjs",
+    "watch:st": "node cmp/cmp.mjs --watch",
+    "dev": "npm run watch:st"
   },
   "dependencies": {
     "@tailwindcss/cli": "^4.3.3",
