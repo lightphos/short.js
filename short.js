@@ -1,8 +1,27 @@
 export function fix(content) {
     document.addEventListener('DOMContentLoaded', () => {
-        const div = document.createElement('div');
-        div.id = 'short-app';
-        div.innerHTML = content; 
+        var div = document.getElementById("short");
+        console.log("div == " + JSON.stringify(div))
+        if (!div) {
+            console.log("Create short div");
+            var div = document.createElement('div');
+            div.id = 'short';
+        } else {
+            console.log("As script")
+            const short = document.querySelector('#short');
+
+            const html = short.outerHTML;
+            short.parentNode.removeChild(short);
+            console.log(html);
+               console.log('Copied text:', html);
+    console.log(
+        'Still in DOM:',
+        document.querySelector('#short')
+    );
+        }
+        if (content) {
+          div.innerHTML = content; 
+        }
         document.body.appendChild(div);
         console.log("Fixed " + Object.keys(this));
     }); 
@@ -66,7 +85,7 @@ export function lnk({ ref, txt, cls }) {
     return (`<a href="${ref}" class="${cls}">${txt}</a>`);
 }
 
-export function btn( {txt, cls, clk}) {
+export function btn( {txt = null, cls = null, clk = null}) {
     return (
         `<button type="submit" onClick="${clk}" class="${cls}">${txt}</button>`
     )
