@@ -149,7 +149,6 @@ async function startWatch() {
     // small debounce
     clearTimeout(startWatch._timer);
     startWatch._timer = setTimeout(() => {
-      console.log(`\n↻ Change detected: ${filename}`);
       compileFile(fullPath);
     }, 100);
   });

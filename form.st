@@ -11,7 +11,7 @@
         <usr></usr>
         <pwd></pwd>
         <sub></sub>
-
+        <br>
         <button>Sign Up</button>
     <!-- <p>${sh.lnk({ref:"/pg/signup", txt:"sign up"})}</p> -->
     </form>
@@ -21,9 +21,10 @@
         <pwd></pwd>
         <cpwd></cpwd>
         <sub></sub>
+        <br>
+        Sign In
     <!-- <p>${sh.lnk({ref:"/pg/signup", txt:"sign up"})}</p> -->
     </form>
-
 </body>
 
 

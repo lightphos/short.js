@@ -32,9 +32,6 @@
         </div>`;
     }
 
-    return {
-        cmp,
-        bcmp
-    };
+    return { cmp, bcmp };
 </script>
 
