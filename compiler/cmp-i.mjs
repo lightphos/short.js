@@ -7,6 +7,8 @@ import vm from 'node:vm';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const projectRoot = resolve(__dirname, '..'); // assume cmp/ is inside project root
+const ext = ".jsx";
+const jsxExtension = /\.jsx$/i;
 
 function compile(sxSource) {
   let html = sxSource;
@@ -18,20 +20,92 @@ function compile(sxSource) {
 
   // 3. Ensure proper HTML structure if missing
   if (!html.includes('<!DOCTYPE')) {
-    html = '<!DOCTYPE html>\n<html lang="en">\n<head>\n  <meta charset="UTF-8">\n  <title>Compiled from .st</title>\n</head>\n<body>\n' + html + '\n</body>\n</html>';
+    html = '<!-- Short.js: compiled from '+ext+' -->\n';
   }
 
   return html;
 }
 
+function parseAttributes(attributeText) {
+    const attrs = {};
+
+    const attributePattern =
+        /([:\w-]+)(?:\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s"'=<>`]+)))?/g;
+
+    for (const match of attributeText.matchAll(attributePattern)) {
+        const [, name, doubleValue, singleValue, bareValue] = match;
+
+        attrs[name] =
+            doubleValue ??
+            singleValue ??
+            bareValue ??
+            true;
+    }
+
+    return attrs;
+}
+
+function renderComponent(sh, components, name, attr = '') {        
+    const component = components[name];
+
+    console.log(name + ":" + attr)
+    if (typeof component !== 'function') {
+        console.log(
+            `Unknown component: <${name}></${name}>`            );
+        return    
+    }
+
+    const attrs = parseAttributes(attr);
+
+    return component(sh, attrs);
+}
+
+function renderIt(sh, components, source, script) {
+    const pattern = /<([A-Za-z][\w-]*)([^>]*?)(?:\/\s*>|>\s*<\/\1\s*>)/g;
+    const output = source.replace(script, '')
+    .replace(
+        pattern,
+        (match, name, attr) => {
+            if (!Object.hasOwn(components, name)) {
+                return match;
+            }
+
+            return renderComponent(sh, components, name, attr);
+        }
+        
+    );
+    return output;
+}
 
 async function runScript(inputPath, source) {
 
     const scriptMatch = source.match(
-      /<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/i
+      /<short(?:\s[^>]*)?>([\s\S]*?)<\/short>/i
     );
 
-    const scriptCode = scriptMatch[1];
+    if (!scriptMatch) {
+      throw new Error('No <short> block found');
+    }
+
+    const scriptCode = scriptMatch[1].trim();
+
+    const fnNames = [
+      ...scriptCode.matchAll(/function\s+([A-Za-z_$][\w$]*)\s*\(/g)
+    ].map(m => m[1]);
+
+    // Optional: also support arrow functions assigned to const/let
+    // const arrowNames = [...scriptCode.matchAll(/(?:const|let)\s+([A-Za-z_$][\w$]*)\s*=\s*(?:async\s*)?\([^)]*\)\s*=>/g)].map(m => m[1]);
+    // const allNames = [...new Set([...fnNames, ...arrowNames])];
+
+    if (fnNames.length === 0) {
+      throw new Error('No component functions found inside <short>');
+    }
+
+    const wrappedCode = `
+      ${scriptCode}
+
+      return { ${fnNames.join(', ')} };
+    `;
 
     const shortUrl = new URL('../short.js', import.meta.url);
     const sh = await import(shortUrl);
@@ -41,55 +115,26 @@ async function runScript(inputPath, source) {
 
     const script = new vm.Script(
             `(function () {
-                ${scriptCode}         
+                ${wrappedCode}         
             })()`, {
         filename: inputPath
     });
 
     const components = script.runInContext(context);
-    function renderComponent(name) {        
-        const component = components[name];
 
-        if (typeof component !== 'function') {
-            console.log(
-                `Unknown component: <${name}></${name}>`            );
-            return    
-        }
+    const result = renderIt(sh, components, source, scriptMatch[0])
+    const result2 = renderIt(sh, components, result, scriptMatch[0])
 
-        return component(sh);
-    }
-
-    const pattern = /<([A-Za-z][\w-]*)(?:\s*\/\s*>|\s*>\s*<\/\1\s*>)/g;
-    const output = source.replace(scriptMatch[0], '')
-    .replace(
-        pattern,
-        (match, name) => renderComponent(name)
-    );
-
-    const ot = output.replace(
-        pattern,
-        (match, name) => renderComponent(name)
-    );
-
-    // console.log(ot);
     // mkdirSync('./dist', { recursive: true });
 
-    // const outputPath = inputPath.replace(/\.st$/i, '.html');
-
-    // console.log(outputPath);
-    // writeFileSync(
-    //     outputPath,
-    //     ot,
-    //     'utf8'
-    // );
-    return ot;
+    return result;
 }
 
 // ──────────────────────────────────────────────
 // Compile a single file
 // ──────────────────────────────────────────────
 async function compileFile(inputPath) {
-  const outputPath = inputPath.replace(/\.st$/i, '.html');
+  const outputPath = inputPath.replace(jsxExtension, '.html');
 
   try {
     const source = readFileSync(inputPath, 'utf8');
@@ -114,7 +159,7 @@ function findStFiles(dir, files = []) {
       // skip node_modules and hidden folders
       if (entry.name === 'node_modules' || entry.name.startsWith('.')) continue;
       findStFiles(full, files);
-    } else if (extname(entry.name).toLowerCase() === '.st') {
+    } else if (extname(entry.name).toLowerCase() === '.jsx') {
       files.push(full);
     }
   }
@@ -127,7 +172,7 @@ function findStFiles(dir, files = []) {
 async function buildAll() {
   const files = findStFiles(projectRoot);
   if (files.length === 0) {
-    console.log('No .st files found.');
+    console.log('No '+ext+' files found.');
     return;
   }
   console.log(`Building ${files.length} file(s)...`);
@@ -138,12 +183,12 @@ async function buildAll() {
 // Watch mode
 // ──────────────────────────────────────────────
 async function startWatch() {
-  console.log('👀 Watching for .st file changes... (Ctrl+C to stop)\n');
+  console.log('👀 Watching for '+ext+' file changes... (Ctrl+C to stop)\n');
   buildAll(); // initial build
 
   // Watch the whole project recursively
   watch(projectRoot, { recursive: true }, (eventType, filename) => {
-    if (!filename || !filename.toLowerCase().endsWith('.st')) return;
+    if (!filename || !filename.toLowerCase().endsWith(ext)) return;
 
     const fullPath = resolve(projectRoot, filename);
     // small debounce

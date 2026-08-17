@@ -1,12 +1,15 @@
 {
   "type": "module",
   "scripts": {
-    "build:st": "node cmp/cmp.mjs",
-    "watch:st": "node cmp/cmp.mjs --watch",
-    "dev": "npm run watch:st"
+    "build": "node compiler/cmp.mjs",
+    "watch": "node compiler/cmp.mjs --watch",
+    "dev": "npm run watch"
   },
   "dependencies": {
+    "@babel/parser": "^8.0.4",
+    "@babel/traverse": "^8.0.4",
     "@tailwindcss/cli": "^4.3.3",
+    "parse5": "^8.0.1",
     "tailwindcss": "^4.3.3"
   }
 }

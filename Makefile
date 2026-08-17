@@ -10,4 +10,4 @@ tw:
 	npx @tailwindcss/cli -i ./style-i.css -o ./style-o.css --watch
 
 cmp.%:
-	npm run build:st -- $*.st
+	npm run build -- eg/$*.jsx
