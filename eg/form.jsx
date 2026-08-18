@@ -3,10 +3,12 @@
     <meta charset="UTF-8" />
     <title>Form Example</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link href="../style-o.css" rel="stylesheet" />
+    <link href="./style-o.css" rel="stylesheet" />
 </head>
 
 <body>
+    <fieldset>
+        <legend>Sign</legend>
     <form class="frm-sh">
         <h2 class="hdr-sh">Sign In</h2>
         <usr nm="User"></usr>
@@ -17,7 +19,9 @@
         </p>
         <button type="button" onClick='own()' class='btn-sh'>Click</button>
     </form>
+    </fieldset>
 
+    <fieldset>
     <form class="frm-sh">
         <h2 class="hdr-sh">Sign Up</h2>
         <usr nm="new user"></usr>
@@ -28,13 +32,14 @@
             <lnk rf="/signin" txt="sign in"></lnk>
         </p>
     </form>
+</fieldset>
 </body>
 <script>
-    function own() {alert('ooh!')}
+    function own() {alert('alert!')}
 </script>
 
 <short>
-    // @ts-ignore
+    // Use language mode HTML 
    
     import * as sh from '../short.js';
     

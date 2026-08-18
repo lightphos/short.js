@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>JSX List</title>
+    <style>
+        body {
+            font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif
+        }
+    </style>
+</head>
+<body>
+
+<script src="https://unpkg.com/@babel/standalone/babel.js"></script>
+<script type="importmap">
+{
+    "imports": {
+        "react": "https://esm.sh/react"
+    }
+}
+</script>
+
+
+<script type="module" src="../short.js"></script>
+
+<script data-type="module" type="text/babel" >
+
+    import React from "react" // babel needs React to traslate JSX
+
+    import * as sh from "../short.js"
+    
+    let items = ["Link", "Zelda", "Rhoam"]
+
+    function ItemsList({txt}) {
+        return (
+            <div>
+                <h1>JSX Example {txt} with {items.length} items </h1>
+                <ul>
+                    { items.map((val, id) => <li key={id}>{val}</li>) }
+                </ul>
+                
+            </div>
+        )
+    }
+
+    function Copy() {
+    return (
+        <>
+            <br />
+            <hr />
+            &copy; 2026 | short.js {new Date().toLocaleTimeString()}
+        </>
+    );
+    }
+
+    function App() {
+        return (
+            <>
+            <ItemsList txt="botw" />
+            <Copy />
+            </>
+        )
+    }
+    // sh.fix(<ItemsList txt='BOTW' />).fix(Copy())
+    await sh.fix(<App />)
+
+</script>
+
+
+</body>
+</html>
+
+</script>

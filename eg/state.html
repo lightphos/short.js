@@ -3,34 +3,80 @@
     <meta charset="UTF-8">
     <title>Form Example</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="../style-o.css" rel="stylesheet">
+    <!-- <link href="./style-o.css" rel="stylesheet"> -->
 </head>
 
 <body>
+
+
+<script src="https://unpkg.com/@babel/standalone/babel.js"></script>
+<script type="importmap">
+{
+    "imports": {
+        "react": "https://esm.sh/react"
+    }
+}
+</script>
+
+
+<script type="module" src="../short.js"></script>
+
+<script data-type="module" type="text/babel" >
+
+    import React from "react" // babel needs React to traslate JSX
+
+    import * as sh from "../short.js"
+
+    const mstate = {
+        hitCount: 0,
+        lastUpdated: new Date()			
+    }
     
-    <div id="short">
-       <h1>short work really</h1>
-       
-        <div>
-            <h1>short injected</h1>
-            hi 
-            <a href="/home" class="undefined">home</a>
-            <button type="submit" onclick="null" class="null">sij</button>
-        </div>
-       <p>para</p>
-       
-        <div>
-            <h1>short injected</h1>
-            hi 
-            <a href="/home" class="undefined">home</a>
-            <button type="submit" onclick="null" class="null">sij</button>
-        </div>
-       <h2>btn</h2>
-       <button type="submit" onclick="null" class="null">bij</button>
-    </div>
+    let sts = "Loading.."
+    const [mcount, setCount] = sh.store(mstate);
+    const [msts, setSts] = sh.store(sts);
+
+    function ShowVal() {
+        return mcount().hitCount;
+    }
+
+    function HitCounter() {
+
+        const [myState, setMyState] = React.useState(mstate)
+
+        function onClickHandler() { 
+            
+            let val = {
+                hitCount: mcount().hitCount + 1, 
+                lastUpdated: new Date()
+            }
+
+            setMyState(val)
+
+            setCount(val)
+
+            setSts("Loaded")
+        }
 
 
+        return (
+            <>
+                <h1>State Management - Simple Example</h1>
+                <div>
+                    <button onClick={onClickHandler}>Click me</button>
+                    <p>Hit count: <b>{mcount().hitCount}</b></p>
+                    <p>Last updated: <b>{mcount().lastUpdated.toLocaleTimeString()}</b></p>
+                    <hr />
+                    <p>{msts()}</p>
+                </div>
+            </>
+        )
+    }
+		
+  sh.fix(<HitCounter />)
+    
 
+</script>
 
-
-</body></html>
+</body>
+</html>

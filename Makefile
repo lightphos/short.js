@@ -7,7 +7,7 @@ twi:
 	npm install tailwindcss @tailwindcss/cli
 
 tw:
-	npx @tailwindcss/cli -i ./style-i.css -o ./style-o.css --watch
+	npx @tailwindcss/cli -i ./eg/style-i.css -o ./eg/style-o.css --watch
 
 cmp.%:
 	npm run build -- eg/$*.jsx

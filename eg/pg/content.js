@@ -1,4 +1,4 @@
-import { sh } from '../short-api.js';
+import { sh } from '../../short-api.js';
 
 export function content({ txt }) {
     return (

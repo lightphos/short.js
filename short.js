@@ -1,30 +1,35 @@
-export function fix(content) {
-    document.addEventListener('DOMContentLoaded', () => {
-        var div = document.getElementById("short");
-        console.log("div == " + JSON.stringify(div))
-        if (!div) {
-            console.log("Create short div");
-            var div = document.createElement('div');
-            div.id = 'short';
-        } else {
-            console.log("As script")
-            const short = document.querySelector('#short');
 
-            const html = short.outerHTML;
-            short.parentNode.removeChild(short);
-            console.log(html);
-               console.log('Copied text:', html);
-    console.log(
-        'Still in DOM:',
-        document.querySelector('#short')
-    );
-        }
-        if (content) {
-          div.innerHTML = content; 
-        }
-        document.body.appendChild(div);
-        console.log("Fixed " + Object.keys(this));
-    }); 
+async function createShort(root) {
+    const { createRoot } = await import("https://esm.sh/react-dom/client");
+
+    return createRoot(root)
+}
+
+async function initFix(content) {
+    console.log("Fix content " + content)
+
+    var sdiv = document.getElementById("short");
+    if (!sdiv) {
+        var div = document.createElement('div');
+        div.id = 'short';
+        sdiv = div;
+        document.body.appendChild(sdiv);
+    } 
+
+    console.log(sdiv)
+    let root = await createShort(sdiv)
+    console.log(root)
+    root.render(content)
+}
+
+export function fix(content) {
+    if (document.readyState !== "loading") {
+      initFix(content);
+      return this;
+    }
+
+    document.addEventListener("DOMContentLoaded", () => initFix(content));
+    return this;
 }
 
 function createShortClass(cssUrl) {
@@ -112,8 +117,25 @@ export function inp({ lbl = null, ph = null, ty = 'text' }) {
   return (
     str
   )
-  
 }
 
+const _shortMap = new Map()
+
+export function store(val) {
+  const key = crypto.randomUUID();
+  console.log(key); 
+
+  _shortMap.set(key, val);
+  return [
+    () => _shortMap.get(key), 
+    (newVal) => _shortMap.set(key, newVal)
+  ];
+
+}
+
+export function value(key) {
+    let v = _shortMap.get(key);
+    return v
+}
 
 

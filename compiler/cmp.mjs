@@ -334,7 +334,7 @@ async function renderSource(source, inputPath) {
 
 function addCompilerComment(html) {
   return (
-    `<!-- Short.js: compiled from ${
+    `<!-- Compiled from ${
       SOURCE_EXTENSION
     } -->\n` +
     html
