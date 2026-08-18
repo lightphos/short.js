@@ -5,11 +5,12 @@ import {
   writeFile,
   readdir,
   watch,
+  unlink,
 } from 'node:fs/promises';
 
 import path from 'node:path';
 import vm from 'node:vm';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 
 import {
   parseFragment,
@@ -21,6 +22,8 @@ import {
   parse as parseJavaScript,
 } from '@babel/parser';
 
+import { transformSync } from '@babel/core';
+import { renderToStaticMarkup } from 'react-dom/server';
 import traverseModule from '@babel/traverse';
 
 const traverse =
@@ -67,7 +70,7 @@ function parseShortBlock(source, inputPath) {
 
 function parseComponentScript(code, inputPath) {
   const ast = parseJavaScript(code, {
-    sourceType: 'script',
+    sourceType: 'module',
     sourceFilename: inputPath,
     errorRecovery: false,
     plugins: ['jsx'],
@@ -153,20 +156,19 @@ function parseComponentScript(code, inputPath) {
     )
     .join(',');
 
-  const fnN = functionNames.join(', ');
-  console.log("Cd: " +code)
-  const wrappedCode = `
-    ${code}
-    return { ${fnN} };
-  `;
+  
+  // const wrappedCode = `
+  //   ${code}
+  //   return { ${fnN} };
+  // `;
 
-  console.log('WRAPPED')
-  console.log(functionNames)
-  console.log(wrappedCode)
-  return {
-    ast,
-    wrappedCode,
-  };
+
+  const exportNames = [...new Set(functionNames)];
+  // return {
+  //   ast,
+  //   wrappedCode,
+  // };
+  return { exportNames };
 }
 
 function attributesToObject(attributes = []) {
@@ -178,12 +180,11 @@ function attributesToObject(attributes = []) {
   );
 }
 
-function createRenderer(components, sh) {
+function createRenderer(components) {
   const rendering = [];
 
   function renderComponent(name, attrs) {
-    const component =
-      components[name];
+    const component = components[name];
 
     if (typeof component !== 'function') {
       return null;
@@ -200,15 +201,18 @@ function createRenderer(components, sh) {
     rendering.push(name);
 
     try {
-      const result = component(sh, attrs);
+      const result = component(attrs);
 
-      if (typeof result !== 'string') {
-        throw new TypeError(
-          `Component "${name}" must return an HTML string`
-        );
+      let html;
+
+      if (typeof result === 'string') {
+        html = result;
+      } else {
+        // real React element / JSX result
+        html = renderToStaticMarkup(result);
       }
 
-      return parseFragment(result);
+      return parseFragment(html);
     } finally {
       rendering.pop();
     }
@@ -261,82 +265,67 @@ function createRenderer(components, sh) {
 }
 
 async function loadComponents(code, inputPath) {
-  const {
-    wrappedCode,
-  } = parseComponentScript(
-    code,
-    inputPath
+  const { exportNames } = parseComponentScript(code, inputPath);
+
+  // Turn JSX → React.createElement / jsx() calls
+  const transformed = transformSync(code, {
+    filename: inputPath,
+    presets: [
+      ['@babel/preset-react', {
+        runtime: 'automatic',   // no need for `import React` in every short block
+      }],
+    ],
+    babelrc: false,
+    configFile: false,
+  }).code;
+
+  // Sibling temp file → relative imports resolve against the .jsx file
+  const tempPath = path.join(
+    path.dirname(inputPath),
+    `.short-tmp-${Date.now()}-${Math.random().toString(36).slice(2)}.mjs`
   );
 
-  const context = vm.createContext({
-    console,
-  });
+  const moduleCode = `${transformed}
 
-  const script = new vm.Script(
-    `(function () {
-        ${wrappedCode}
-      })()
-    `,
-    {
-      filename: inputPath,
+  export { ${exportNames.join(', ')} };
+`;
+
+  try {
+    await writeFile(tempPath, moduleCode, 'utf8');
+
+    const mod = await import(pathToFileURL(tempPath).href);
+
+    const components = {};
+    for (const name of exportNames) {
+      if (typeof mod[name] === 'function') {
+        components[name] = mod[name];
+      }
     }
-  );
 
-  const components =
-    script.runInContext(context);
-
-  if (
-    !components ||
-    typeof components !== 'object'
-  ) {
-    throw new TypeError(
-      'The <short> block must define a component object or functions'
-    );
-  }
-
-  for (
-    const [name, component] of
-    Object.entries(components)
-  ) {
-    if (typeof component !== 'function') {
+    if (Object.keys(components).length === 0) {
       throw new TypeError(
-        `Component "${name}" must be a function`
+        'The <short> block must define at least one component function'
       );
     }
-  }
 
-  return components;
+    return components;
+  } finally {
+    try {
+      await unlink(tempPath);
+    } catch {
+      // ignore cleanup errors
+    }
+  }
 }
 
 async function renderSource(source, inputPath) {
-  const {
-    fullBlock,
-    code,
-  } = parseShortBlock(
-    source,
-    inputPath
-  );
+  const { fullBlock, code, } = parseShortBlock(source, inputPath);
 
-  const components =
-    await loadComponents(
-      code,
-      inputPath
-    );
+  const components = await loadComponents(code, inputPath);
 
-  const sh = await import(
-    new URL('../short.js', import.meta.url)
-  );
+  const document = parseHtml(source.replace(fullBlock, ''));
 
-  const document =
-    parseHtml(
-      source.replace(fullBlock, '')
-    );
-
-  const renderer =
-    createRenderer(
-      components,
-      sh
-    );
+  const renderer = createRenderer(components);
 
   renderer.renderChildren(document);
 
@@ -344,12 +333,6 @@ async function renderSource(source, inputPath) {
 }
 
 function addCompilerComment(html) {
-  if (
-    /<!doctype\s+html>/i.test(html)
-  ) {
-    return html;
-  }
-
   return (
     `<!-- Short.js: compiled from ${
       SOURCE_EXTENSION
@@ -376,25 +359,14 @@ async function compileFile(inputPath) {
     );
 
   try {
-    const source =
-      await readFile(
-        inputPath,
-        'utf8'
-      );
+    const source = await readFile(inputPath, 'utf8');
 
-    const compiled =
-      addCompilerComment(
-        await renderSource(
+    const compiled = addCompilerComment(await renderSource(
           source,
           inputPath
-        )
-      );
+        ));
 
-    await writeFile(
-      outputPath,
-      compiled,
-      'utf8'
-    );
+    await writeFile(outputPath, compiled, 'utf8');
 
     console.log(
       `✓ ${path.basename(inputPath)} → ${
@@ -402,11 +374,12 @@ async function compileFile(inputPath) {
       }`
     );
   } catch (error) {
+
     console.error(
       `✗ Failed to compile ${
         path.basename(inputPath)
       }:`,
-      error.message
+      error
     );
   }
 }

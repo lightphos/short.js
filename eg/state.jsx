@@ -10,34 +10,31 @@
 <body>
     
     <div id="short">
-       <h1>short work</h1>
+       <h1>short work really</h1>
        <cmp></cmp>
        <p>para</p>
        <cmp></cmp>
        <h2>btn</h2>
-       <bcmp></bcmp>
+       <bcmp t='bij'></bcmp>
     </div>
 </body>
 
 <short>
-    function cmp(sh) { 
+    import * as sh from '../short.js';
+
+    function cmp() { 
         return (`
         <div>
             <h1>short injected</h1>
             ${sh.txt('hi ')}
             ${sh.lnk({ref:'/home', txt:'home'})}
-            <bcmp/>
+            ${bcmp({t: 'sij'})}
         </div>`);
     }
 
-
-    function bcmp(sh) {
-        return `
-        <div>
-            ${sh.btn({txt: 'btn'})}
-        </div>`;
+    function bcmp({ t }) {
+        return sh.btn({ txt: t });
     }
-
 
 </short>
 </html>

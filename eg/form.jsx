@@ -34,29 +34,34 @@
 </script>
 
 <short>
+    // @ts-ignore
+   
+    import * as sh from '../short.js';
     
-    function lnk(sh, {rf, txt}) { 
-      return `<a href='${rf}'>${txt}</a>`;
+    function lnk({ rf, txt }) { 
+      return (
+      <a href={rf}>{txt}</a>
+      );
     }
 
-    function usr(sh, {nm}) { 
+    function usr({ nm }) { 
       return (
-       `<p><label> ${nm} ==
-       <input type="text" placeholder="username" /></label>
-       </p>` 
+       <p><label>{nm}&nbsp;  
+        <input type="text" placeholder="username" /></label>
+       </p> 
        );
     }
 
-    function pwd(sh) { 
+    function pwd() { 
         return `<p>${sh.inp({ lbl: 'Password', ph: 'password', ty: 'password' })}</p>`;
     }
 
-    function cpwd(sh) { 
+    function cpwd() { 
         return `<p>${sh.inp({ lbl: 'Confirm', ph: 'password', ty: 'password' })}</p>`;
     }
 
-    function sub(sh) { 
-        return (`${sh.btn({ txt: "submit", clk: "/", cls: "btn-sh" })}`);
+    function sub() { 
+        return sh.btn({ txt: "submit", clk: "/", cls: "btn-sh" }); 
     }
 
 </short>
