@@ -1,12 +1,14 @@
 {
   "type": "module",
   "scripts": {
-    "build:st": "node cmp/cmp.mjs",
-    "watch:st": "node cmp/cmp.mjs --watch",
+    "build:st": "node compile/cmp.mjs",
+    "watch:st": "node compile/cmp.mjs --watch",
+    "tw": "npx @tailwindcss/cli -i ./app/app.tcss -o ./app/app.css --watch",
     "dev": "npm run watch:st"
   },
   "dependencies": {
     "@tailwindcss/cli": "^4.3.3",
+    "jsdom": "^30.0.1",
     "tailwindcss": "^4.3.3"
   }
 }

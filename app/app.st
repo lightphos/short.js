@@ -2,52 +2,42 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>App</title>
-    <style src="../style-o.css"></style>
-    <import src="./app.js"></import>
+    <title>Short App</title>
+    <style src="./app.css"></style>
 </head>
 
-<body>    
-    <div id="short">
-       <h1>short work</h1>
-       <cmp v="1"></cmp>
+<body class="bg-gradient-to-br from-indigo-100 to-purple-100 min-h-screen">
+    <div id="short" class="max-w-2xl mx-auto p-8">
+       <h1 class="text-4xl font-bold text-gray-800 mb-8 text-center">My App</h1>
 
-       <p>para</p>
-       <cmp v="2"></cmp>
+       <div class="flex flex-col gap-6">
+           <cmp v="1"></cmp>
+           <cmp v="2"></cmp>
+       </div>
 
-       <h2>btn</h2>
+       <div class="mt-8 text-center">
+           <bcmp v="Click me" class=""></bcmp>
+       </div>
 
-       <bcmp></bcmp>
+       <div class="mt-6 flex flex-wrap gap-4 justify-center">
+           <txts v="some text"></txts>
+           <txt2 v="some moretext"></txt2>
+       </div>
 
-       <br>
-       <a href="user.html">User</a>
+       <nav class="mt-10 flex gap-4 justify-center">
+           <a href="./cmp/user.html" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition">User</a>
+           <a href="./cmp/form.html" class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition">Form</a>
+       </nav>
 
-       <txt v="some text"></txt>
     </div>
+
 </body>
+
 </html>
 
-
 <script type="module">
-    function cmp({v}) { 
-        return `
-        <div>
-            <h1>cmp ${v}</h1>
-            <bcmp/>
-        </div>
-        `;
-    }
-
-
-    function bcmp() {
-        return `
-<button>abtn</button>
-        `;
-    }
-
+    import { txts, txt2, bcmp, cmp } from './app.js';
     return {
-        cmp,
-        bcmp
+        txts, txt2, bcmp, cmp
     };
 </script>
-

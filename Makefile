@@ -1,13 +1,13 @@
 .PHONY: cmp
 
 all:
-	npx http-server . -p 3000 --cors -c-1
+	npx http-server ./app -p 3000 --cors -c-1
 
 twi:
-	npm install tailwindcss @tailwindcss/cli
+	npm install tailwindcss @tailwindcss/cli jsdom
 
 tw:
-	npx @tailwindcss/cli -i ./style-i.css -o ./style-o.css --watch
+	npm run tw
 
 cmp.%:
 	npm run build:st -- app/$*.st

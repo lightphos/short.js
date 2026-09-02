@@ -95,13 +95,16 @@ export function txt(txts) {
     return txts;
 }
 
-export function inp({ lbl = null, ph = null, ty = 'text' }) {
+export function inp({ lbl = null, ph = null, ty = 'text', cls = null }) {
   var str = ' <input type="'+ty+'" '
+  if (cls) {
+    str += ' class="'+cls+'"'
+  }
   if (lbl) {
     str = '<label>' + lbl + str
   }
   if (ph) {
-    str += ' placeholder = "'.concat(ph).concat('"')    
+    str += ' placeholder = "'.concat(ph).concat('"')
   }
 
   str += ' />';
@@ -112,7 +115,7 @@ export function inp({ lbl = null, ph = null, ty = 'text' }) {
   return (
     str
   )
-  
+
 }
 
 

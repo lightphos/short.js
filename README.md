@@ -1,94 +1,172 @@
 # short.js
 
-A lightweight JavaScript library for building modular web components using Shadow DOM and Web Components API.
+A lightweight JavaScript library for building modular web components with Shadow DOM, and a compiler that transforms `.st` template files into static HTML.
 
 ## Features
 
-- **Modular Components**: Easily create and reuse components.
-- **Shadow DOM**: Encapsulated styles to prevent CSS collisions.
-- **Lightweight**: Minimal footprint for fast loading.
-- **Template-driven**: Simple API for rendering dynamic content.
-- **Helper Utilities**: Convenience functions for common DOM operations.
+- **Modular Components**: Create and reuse custom components with ES modules
+- **Shadow DOM**: Encapsulated styles to prevent CSS collisions
+- **ST Compiler**: Transform `.st` template files with embedded components into static HTML
+- **ES Module Scripts**: Write component logic using native ES module imports
+- **Tailwind CSS**: Built-in support for Tailwind CSS styling
+- **Watch Mode**: Auto-recompile on file changes
 
-## Installation
+## Quick Start
 
-You can include `short.js` directly in your HTML file:
+### Install
+
+```bash
+npm install
+```
+
+### Compile Templates
+
+```bash
+# Compile all .st files
+npm run build:st
+
+# Watch mode - recompile on changes
+npm run watch:st
+```
+
+### Start Dev Server
+
+```bash
+npx http-server ./app -p 3000 --cors -c-1
+```
+
+## Template Syntax (.st Files)
+
+Create `.st` files with HTML and embedded component scripts:
 
 ```html
-<script type="module" src="./short.js"></script>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>My App</title>
+    <style src="./app.css"></style>
+</head>
+
+<body>
+    <div id="short">
+        <h1>Welcome</h1>
+        <cmp v="1"></cmp>
+        <mybutton></mybutton>
+    </div>
+</body>
+
+<script type="module">
+    import { txt } from './app.js';
+
+    function cmp({v}) {
+        return `<div>Component: ${v}</div>`;
+    }
+
+    function mybutton() {
+        return `<button>Click me</button>`;
+    }
+
+    return { cmp, mybutton };
+</script>
+</html>
 ```
 
-## Usage
+### Script Features
 
-### Using the `fix` function
-
-The `fix` function injects a `div` with id `short-app` the specified content into the document body.
+- **ES Module Imports**: Use `import` to include shared utilities
+- **Return Object**: Export components via the `return { ... }` statement
+- **Auto-discovered**: Imported functions are automatically available as components
 
 ```javascript
-import { fix } from './short.js';
+<script type="module">
+    import { inp, btn } from './short.js';
 
-fix('<h1>Hello, World!</h1>');
+    function usr({sh}) {
+        return `<p>${sh.inp({lbl: 'Name', ph: 'Enter name'})}</p>`;
+    }
+
+    function sub({sh}) {
+        return sh.btn({txt: 'Submit', cls: 'btn-primary'});
+    }
+
+    return { usr, sub };
+</script>
 ```
 
-### Using the `sfix` function
+### CSS Shortcut
 
-The `sfix` function creates a custom element `<short-app>` and renders the provided content inside its Shadow DOM.
+Use `<style src="path/to.css">` as shorthand for `<link rel="stylesheet">`:
 
-```javascript
-import { sfix } from './short.js';
-
-sfix('<p>This is rendered inside a Shadow DOM.</p>');
+```html
+<style src="./app.css"></style>
 ```
 
-### Helper Utilities
+Compiles to:
 
-short.js includes several helper functions for common DOM operations:
-
-#### `lnk({ ref, txt, cls })`
-
-Generates a styled anchor tag.
-
-```javascript
-import { lnk } from './short.js';
-
-const example = lnk({ 
-  ref: 'https://example.com', 
-  txt: 'Click Me', 
-  cls: 'text-blue-600' 
-});
+```html
+<link rel="stylesheet" href="./app.css">
 ```
 
-#### `btn({ txt, cls, clk })`
+## Helper Utilities
 
-Generates a clickable button element.
+short.js includes helper functions passed to components as `sh`:
+
+### `sh.inp({ lbl, ph, ty, cls })`
+
+Generates an input field with optional label.
 
 ```javascript
-import { btn } from './short.js';
-
-const example = btn({ 
-  txt: 'Submit', 
-  cls: 'bg-blue-600 hover:bg-blue-700', 
-  clk: 'handleSubmit()' 
-});
+sh.inp({ lbl: 'Email', ph: 'you@example.com', ty: 'email', cls: 'w-full' })
 ```
 
-#### `txt(txts)`
+### `sh.btn({ txt, cls, clk })`
 
-Returns the provided text content.
+Generates a styled button.
 
 ```javascript
-import { txt } from './short.js';
+sh.btn({ txt: 'Submit', clk: 'handleClick()', cls: 'bg-blue-600' })
+```
 
-const example = txt('Hello, World!');
+### `sh.lnk({ ref, txt, cls })`
+
+Generates an anchor tag.
+
+```javascript
+sh.lnk({ ref: '/page', txt: 'Go to Page', cls: 'text-blue-600' })
+```
+
+### `sh.txt(content)`
+
+Returns text content.
+
+```javascript
+sh.txt('Hello, World!')
 ```
 
 ## Project Structure
 
-- `short.js`: Core library with helper utilities (`fix`, `sfix`, `lnk`, `btn`, `txt`).
-- `app/`: Contains application-specific components and logic (`app.js`, `header.js`, `footer.js`, `content.js`).
-- `index.html`: Example implementation.
-- `slots.css` / `slots.html`: Example usage of slots and CSS.
+```
+├── short.js          # Core library with helper utilities
+├── compile/
+│   └── cmp.mjs      # .st to .html compiler
+├── app/
+│   ├── app.st       # Template source files
+│   ├── app.html     # Compiled output
+│   ├── app.css      # Tailwind CSS (compile with `npm run tw`)
+│   └── app.js       # Shared component functions
+└── Makefile          # Build shortcuts
+```
+
+## Build Commands
+
+| Command | Description |
+|---------|-------------|
+| `npm run build:st` | Compile all `.st` files |
+| `npm run watch:st` | Watch and recompile on changes |
+| `npm run tw` | Build Tailwind CSS |
+| `make twi` | Install Tailwind dependencies |
+| `make all` | Start HTTP server |
 
 ## License
 
-This project is licensed under the [LICENSE](LICENSE).
+MIT

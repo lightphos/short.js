@@ -1,9 +1,9 @@
 #!/usr/bin/env node
-import { readFileSync, writeFileSync, mkdirSync, readdirSync, watch, existsSync } from 'fs';
+import { readFileSync, writeFileSync, mkdirSync, readdirSync, watch, existsSync, unlinkSync } from 'fs';
 import { resolve, basename, relative, dirname, extname, join } from 'path';
-import { fileURLToPath } from 'url';
+import { fileURLToPath } from 'node:url';
 import { pathToFileURL } from 'node:url';
-import vm from 'node:vm';
+import { JSDOM } from 'jsdom';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const projectRoot = resolve(__dirname, '..'); // assume cmp/ is inside project root
@@ -11,14 +11,11 @@ const projectRoot = resolve(__dirname, '..'); // assume cmp/ is inside project r
 function compile(sxSource) {
   let html = sxSource;
   // 1. Fix <style src="..."> -> <link rel="stylesheet" href="...">
-//  html = html.replace(/<style\s+src=["']([^"']+)["']\s*>\s*<\/style>/, '<link rel="stylesheet" href="$1">');
+  html = html.replace(/<style\s+src=["']([^"']+)["']\s*>\s*<\/style>/gi, '<link rel="stylesheet" href="$1">');
 
-  // 2. Add module with cmp() and replacement logic
-//  html += ``;
-
-  // 3. Ensure proper HTML structure if missing
+  // 2. Ensure proper HTML structure if missing
   if (!html.includes('<!DOCTYPE')) {
-    html = '<!DOCTYPE html>\n<html lang="en">\n<head>\n  <meta charset="UTF-8">\n  <title>Compiled from .st</title>\n</head>\n<body>\n' + html + '\n</body>\n</html>';
+//    html = '<!DOCTYPE html>\n<html lang="en">\n<head>\n  <meta charset="UTF-8">\n  <title>Compiled from .st</title>\n</head>\n<body>\n' + html + '\n</body>\n</html>';
   }
 
   return html;
@@ -35,58 +32,99 @@ async function runScript(inputPath, source) {
 
     const shortUrl = new URL('../short.js', import.meta.url);
     const sh = await import(shortUrl);
-    const context = vm.createContext({
-        console
-    });
 
-    const script = new vm.Script(
-            `(function () {
-                ${scriptCode}
-            })()`, {
-        filename: inputPath
-    });
-
-    const components = script.runInContext(context);
-
-    function parseAttrs(attrStr) {
-        const attrs = {};
-        const re = /(\w+)\s*=\s*(?:"([^"]*)"|'([^']*)'|(\S+))/g;
-        let m;
-        while ((m = re.exec(attrStr)) !== null) {
-            attrs[m[1]] = m[2] ?? m[3] ?? m[4];
-        }
-        return attrs;
+    // Extract imported names so we can include them in the export
+    const importRe = /import\s+\{([^}]+)\}\s+from\s+['"][^'"]+['"]/g;
+    const importNames = [];
+    let m2;
+    while ((m2 = importRe.exec(scriptCode)) !== null) {
+        const names = m2[1].split(',').map(n => n.trim());
+        importNames.push(...names);
     }
 
-    function renderComponent(name, attrs = {}) {
-        const component = components[name];
-
-        if (typeof component !== 'function') {
-            // console.log(
-            //     `Unknown component: <${name}></${name}>`
-            // );
-            return '';
+    let modifiedCode = scriptCode.replace(
+        /\breturn\s*(\{[\s\S]*?\})\s*;\s*$/,
+        (_, returnObj) => {
+            if (importNames.length > 0) {
+                // Add imported names to the return object
+                // Parse the return object content and append imports
+                const objContent = returnObj.replace(/^\{|\}$/g, '').trim();
+                const parts = [objContent, ...importNames];
+                return `export default { ${parts.join(', ')} };`;
+            }
+            return `export default ${returnObj};`;
         }
-
-        return component({sh, ...attrs});
-    }
-
-    const pattern = /<([A-Za-z][\w-]*)((?:\s+\w+(?:\s*=\s*(?:"[^"]*"|'[^']*'|[^\s>]+))?)*)\s*(\/?>)/g;
-    const output = source.replace(scriptMatch[0], '')
-    .replace(
-        pattern,
-        (match, name, attrStr) => renderComponent(name, parseAttrs(attrStr))
     );
 
-    return output;
+    // Write to a temp .mjs file in the same directory as the .st file
+    // so relative imports (e.g. './app.js') resolve correctly
+    const dir = dirname(inputPath);
+    const tmpName = `.cmp-tmp-${process.pid}-${Date.now()}-${Math.random().toString(36).slice(2)}.mjs`;
+    const tmpPath = join(dir, tmpName);
+
+    let components;
+    try {
+        writeFileSync(tmpPath, modifiedCode, 'utf8');
+        const mod = await import(pathToFileURL(tmpPath).href);
+        components = mod.default;
+    } finally {
+        try { unlinkSync(tmpPath); } catch {}
+    }
+
+    // Remove the script tag so jsdom doesn't try to parse it
+    const bodyHtml = source.replace(scriptMatch[0], '');
+
+    // Parse with jsdom for proper HTML handling
+    const dom = new JSDOM(bodyHtml);
+    const document = dom.window.document;
+
+    // Recursively replace custom component tags with their rendered HTML
+    function processNode(node) {
+        // Walk backwards so we can replace children in place without affecting iteration
+        const children = Array.from(node.childNodes);
+        for (const child of children) {
+            if (child.nodeType === 1) { // element
+                const tagName = child.tagName.toLowerCase();
+                if (typeof components[tagName] === 'function') {
+                    // Get attributes
+                    const attrs = {};
+                    for (const attr of child.attributes) {
+                        attrs[attr.name] = attr.value;
+                    }
+                    // Render the component (passing sh as first arg)
+                    const rendered = components[tagName]({ sh, ...attrs });
+                    // Parse the rendered HTML and replace the element
+                    const tmpDoc = new JSDOM('');
+                    const frag = tmpDoc.window.document.createDocumentFragment();
+                    const tmpBody = tmpDoc.window.document.body;
+                    tmpBody.innerHTML = rendered;
+                    // Process recursively
+                    processNode(tmpBody);
+                    // Replace the child with rendered content
+                    const parent = child.parentNode;
+                    while (tmpBody.firstChild) {
+                        parent.insertBefore(tmpBody.firstChild, child);
+                    }
+                    parent.removeChild(child);
+                } else {
+                    processNode(child);
+                }
+            }
+        }
+    }
+
+    processNode(document.body);
+
+    return dom.serialize();
 }
 
 // ──────────────────────────────────────────────
 // Compile a single file
 // ──────────────────────────────────────────────
 async function compileFile(inputPath) {
-  const outDir = join(projectRoot, '.', 'out');
-  const outputPath = join(outDir, relative(projectRoot, inputPath).replace(/\.st$/i, '.html'));
+  // const outDir = join(projectRoot, '.', 'out');
+  // const outputPath = join(outDir, relative(projectRoot, inputPath).replace(/\.st$/i, '.html'));
+  const outputPath = relative(projectRoot, inputPath).replace(/\.st$/i, '.html');
   mkdirSync(dirname(outputPath), { recursive: true });
 
   console.log(`Compiling ${relative(projectRoot, inputPath)} → ${relative(projectRoot, outputPath)} ...`);
@@ -141,7 +179,10 @@ async function startWatch() {
 
   // Watch the whole project recursively
   watch(projectRoot, { recursive: true }, (eventType, filename) => {
-    if (!filename || !filename.toLowerCase().endsWith('.st')) return;
+    if (!filename.toLowerCase().endsWith('.st') && 
+        !filename.toLowerCase().endsWith('.js')) {
+      return;
+    } 
 
     const fullPath = resolve(projectRoot, filename);
     // small debounce
