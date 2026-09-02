@@ -1,0 +1,57 @@
+<html><head>
+    <meta charset="UTF-8">
+    <title>Counter Demo</title>
+    <link href="../app.css" rel="stylesheet">
+</head>
+
+<body class="bg-linear-to-br from-indigo-100 to-purple-100 min-h-screen flex items-center justify-center">
+    
+        <div class="cnt-card">
+            <h2 class="cnt-title">Counter</h2>
+            <p class="cnt-value">
+                <span data-st="count"></span>
+            </p>
+            <div class="cnt-btn-group">
+                <button class="cnt-btn cnt-btn-dec" onclick="window['st:02ni77:count'] -= window['st:02ni77:step']">−</button>
+                <button class="cnt-btn cnt-btn-inc" onclick="window['st:02ni77:count'] += window['st:02ni77:step']">+</button>
+                <button class="cnt-btn cnt-btn-reset" onclick="window['st:02ni77:count'] = 0">Reset</button>
+            </div>
+        </div>
+        <script>
+(function() {
+    var _s = {"count":0,"step":1};
+    var _sel = '[data-st]';
+    var _id = '02ni77';
+    var _bindings = {
+        "count": Object.defineProperty(window, 'st:02ni77:count', {
+            get: function() { return _s['count']; },
+            set: function(v) {
+                _s['count'] = v;
+                document.querySelectorAll('[data-st="count"]').forEach(function(el) {
+                    el.textContent = v;
+                });
+            }
+        }),
+        "step": Object.defineProperty(window, 'st:02ni77:step', {
+            get: function() { return _s['step']; },
+            set: function(v) {
+                _s['step'] = v;
+                document.querySelectorAll('[data-st="step"]').forEach(function(el) {
+                    el.textContent = v;
+                });
+            }
+        })
+    };
+    // Initialize reactive elements with current state
+    Object.keys(_s).forEach(function(key) {
+        document.querySelectorAll('[' + _sel.replace('[', '').replace(']', '') + '="' + key + '"]').forEach(function(el) {
+            el.textContent = _s[key];
+        });
+    });
+})();
+</script>
+    
+
+
+
+</body></html>

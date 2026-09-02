@@ -43,13 +43,14 @@ async function runScript(inputPath, source) {
     }
 
     let modifiedCode = scriptCode.replace(
-        /\breturn\s*(\{[\s\S]*?\})\s*;\s*$/,
+        /(?:\breturn\s*|export\s+default\s+)({[\s\S]*?})\s*;?\s*$/,
         (_, returnObj) => {
             if (importNames.length > 0) {
-                // Add imported names to the return object
-                // Parse the return object content and append imports
+                // Add only import names that are NOT already in the return object
                 const objContent = returnObj.replace(/^\{|\}$/g, '').trim();
-                const parts = [objContent, ...importNames];
+                const existingNames = objContent.split(',').map(n => n.trim());
+                const newNames = importNames.filter(n => !existingNames.includes(n));
+                const parts = [objContent, ...newNames];
                 return `export default { ${parts.join(', ')} };`;
             }
             return `export default ${returnObj};`;
@@ -179,16 +180,21 @@ async function startWatch() {
 
   // Watch the whole project recursively
   watch(projectRoot, { recursive: true }, (eventType, filename) => {
-    if (!filename.toLowerCase().endsWith('.st') && 
+    if (!filename.toLowerCase().endsWith('.st') &&
         !filename.toLowerCase().endsWith('.js')) {
       return;
-    } 
+    }
 
     const fullPath = resolve(projectRoot, filename);
     // small debounce
     clearTimeout(startWatch._timer);
-    startWatch._timer = setTimeout(() => {
-      compileFile(fullPath);
+    startWatch._timer = setTimeout(async () => {
+      if (filename.toLowerCase().endsWith('.js')) {
+        // Recompile all .st files that might import this .js
+        await buildAll();
+      } else {
+        compileFile(fullPath);
+      }
     }, 100);
   });
 }

@@ -20,11 +20,11 @@ export function fix(content) {
     );
         }
         if (content) {
-          div.innerHTML = content; 
+          div.innerHTML = content;
         }
         document.body.appendChild(div);
         console.log("Fixed " + Object.keys(this));
-    }); 
+    });
 }
 
 function createShortClass(cssUrl) {
@@ -118,5 +118,78 @@ export function inp({ lbl = null, ph = null, ty = 'text', cls = null }) {
 
 }
 
+
+/* ─────────────────────────────────────────────────────────────
+   st(state, opts)
+
+   Reactive state for short components.
+
+   Usage in a component:
+     export function myComp() {
+       const { html, init } = st({ count: 0, step: 1 });
+       return html + init();
+     }
+
+   In the template, use ${key} for initial values and
+   data-st="key" for reactive elements that update automatically.
+   Use window['st:{id}:{key}'] (bracket notation!) in event handlers,
+   because the property name contains colons.
+
+   Example:
+     return `<div>
+       Count: <span data-st="count">${count}</span>
+       <button onclick="window['st:${id}:count'] += window['st:${id}:step']">+</button>
+     </div>` + init();
+
+   opts.elAttr: the data attribute to use (default: "data-st")
+   ───────────────────────────────────────────────────────────── */
+export function st(state = {}, opts = {}) {
+    const {
+        elAttr = 'data-st',  // e.g. "data-st" → <span data-st="count">
+    } = opts;
+
+    const id = Math.random().toString(36).slice(2, 8);
+    const keys = Object.keys(state);
+
+    // Build reactive window bindings for each state key
+    // e.g. window['st:abc123:count'] → setter updates all [data-st="count"] elements
+    const bindings = keys.map(key => {
+        const fullKey = `st:${id}:${key}`;
+        return `"${key}": Object.defineProperty(window, '${fullKey}', {
+            get: function() { return _s['${key}']; },
+            set: function(v) {
+                _s['${key}'] = v;
+                document.querySelectorAll('[${elAttr}="${key}"]').forEach(function(el) {
+                    el.textContent = v;
+                });
+            }
+        })`;
+    }).join(',\n        ');
+
+    const init = function() {
+        return `<script>
+(function() {
+    var _s = ${JSON.stringify(state)};
+    var _sel = '[${elAttr}]';
+    var _id = '${id}';
+    var _bindings = {
+        ${bindings}
+    };
+    // Initialize reactive elements with current state
+    Object.keys(_s).forEach(function(key) {
+        document.querySelectorAll('[' + _sel.replace('[', '').replace(']', '') + '="' + key + '"]').forEach(function(el) {
+            el.textContent = _s[key];
+        });
+    });
+})();
+<\/script>`;
+    };
+
+    // Build HTML snippet with initial values embedded
+    // Caller inserts this into their template
+    const html = keys.map(key => state[key]).join('');
+
+    return { html, init, id, keys, state };
+}
 
 

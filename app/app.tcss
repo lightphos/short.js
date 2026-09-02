@@ -16,3 +16,36 @@
 .hdr-sh {
     @apply text-2xl font-bold text-gray-800 text-center
 }
+
+/* ─── Counter Component ─── */
+.cnt-card {
+    @apply bg-white rounded-xl shadow-lg p-6 text-center;
+}
+
+.cnt-title {
+    @apply text-2xl font-bold text-gray-800 mb-4;
+}
+
+.cnt-value {
+    @apply text-5xl font-mono text-indigo-600 mb-4;
+}
+
+.cnt-btn-group {
+    @apply space-x-2;
+}
+
+.cnt-btn {
+    @apply px-4 py-2 rounded-lg font-medium transition;
+}
+
+.cnt-btn-inc {
+    @apply bg-indigo-600 text-white hover:bg-indigo-700;
+}
+
+.cnt-btn-dec {
+    @apply bg-gray-200 text-gray-800 hover:bg-gray-300;
+}
+
+.cnt-btn-reset {
+    @apply bg-red-500 text-white hover:bg-red-600;
+}
