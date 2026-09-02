@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import { readFileSync, writeFileSync, mkdirSync, readdirSync, watch, existsSync } from 'fs';
-import { resolve, basename, dirname, extname, join } from 'path';
+import { resolve, basename, relative, dirname, extname, join } from 'path';
 import { fileURLToPath } from 'url';
 import { pathToFileURL } from 'node:url';
 import vm from 'node:vm';
@@ -41,62 +41,60 @@ async function runScript(inputPath, source) {
 
     const script = new vm.Script(
             `(function () {
-                ${scriptCode}         
+                ${scriptCode}
             })()`, {
         filename: inputPath
     });
 
     const components = script.runInContext(context);
-    function renderComponent(name) {        
+
+    function parseAttrs(attrStr) {
+        const attrs = {};
+        const re = /(\w+)\s*=\s*(?:"([^"]*)"|'([^']*)'|(\S+))/g;
+        let m;
+        while ((m = re.exec(attrStr)) !== null) {
+            attrs[m[1]] = m[2] ?? m[3] ?? m[4];
+        }
+        return attrs;
+    }
+
+    function renderComponent(name, attrs = {}) {
         const component = components[name];
 
         if (typeof component !== 'function') {
-            console.log(
-                `Unknown component: <${name}></${name}>`            );
-            return    
+            // console.log(
+            //     `Unknown component: <${name}></${name}>`
+            // );
+            return '';
         }
 
-        return component(sh);
+        return component({sh, ...attrs});
     }
 
-    const pattern = /<([A-Za-z][\w-]*)(?:\s*\/\s*>|\s*>\s*<\/\1\s*>)/g;
+    const pattern = /<([A-Za-z][\w-]*)((?:\s+\w+(?:\s*=\s*(?:"[^"]*"|'[^']*'|[^\s>]+))?)*)\s*(\/?>)/g;
     const output = source.replace(scriptMatch[0], '')
     .replace(
         pattern,
-        (match, name) => renderComponent(name)
+        (match, name, attrStr) => renderComponent(name, parseAttrs(attrStr))
     );
 
-    const ot = output.replace(
-        pattern,
-        (match, name) => renderComponent(name)
-    );
-
-    // console.log(ot);
-    // mkdirSync('./dist', { recursive: true });
-
-    // const outputPath = inputPath.replace(/\.st$/i, '.html');
-
-    // console.log(outputPath);
-    // writeFileSync(
-    //     outputPath,
-    //     ot,
-    //     'utf8'
-    // );
-    return ot;
+    return output;
 }
 
 // ──────────────────────────────────────────────
 // Compile a single file
 // ──────────────────────────────────────────────
 async function compileFile(inputPath) {
-  const outputPath = inputPath.replace(/\.st$/i, '.html');
+  const outDir = join(projectRoot, '.', 'out');
+  const outputPath = join(outDir, relative(projectRoot, inputPath).replace(/\.st$/i, '.html'));
+  mkdirSync(dirname(outputPath), { recursive: true });
 
+  console.log(`Compiling ${relative(projectRoot, inputPath)} → ${relative(projectRoot, outputPath)} ...`);
   try {
     const source = readFileSync(inputPath, 'utf8');
     const rs = await runScript(inputPath, source)
     const compiled = compile(rs);
     writeFileSync(outputPath, compiled, 'utf8');
-    console.log(`✓ ${basename(inputPath)} → ${basename(outputPath)}`);
   } catch (err) {
     console.error(`✗ Failed to compile ${basename(inputPath)}:`, err.message);
   }
