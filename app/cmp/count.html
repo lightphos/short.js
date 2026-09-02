@@ -6,24 +6,22 @@
 
 <body class="bg-linear-to-br from-indigo-100 to-purple-100 min-h-screen flex items-center justify-center">
     
-        <div class="cnt-card">
-            <h2 class="cnt-title">Counter</h2>
-            <p class="cnt-value">
-                <span data-st="count"></span>
-            </p>
-            <div class="cnt-btn-group">
-                <button class="cnt-btn cnt-btn-dec" onclick="window['st:02ni77:count'] -= window['st:02ni77:step']">−</button>
-                <button class="cnt-btn cnt-btn-inc" onclick="window['st:02ni77:count'] += window['st:02ni77:step']">+</button>
-                <button class="cnt-btn cnt-btn-reset" onclick="window['st:02ni77:count'] = 0">Reset</button>
+        <div class="ct-card">
+            <h2 class="ct-title">Counter</h2>
+            <p class="ct-value"><span data-st="count">0</span></p>
+            <div class="ct-btn-group">
+                <button class="ct-btn ct-btn-dec" onclick="window['st:pr4cj8:count'] -= 1">−</button>
+                <button class="ct-btn ct-btn-inc" onclick="window['st:pr4cj8:count'] += 1">+</button>
+                <button class="ct-btn ct-btn-reset" onclick="window['st:pr4cj8:count'] = 0">Reset</button>
             </div>
         </div>
         <script>
 (function() {
     var _s = {"count":0,"step":1};
     var _sel = '[data-st]';
-    var _id = '02ni77';
+    var _id = 'pr4cj8';
     var _bindings = {
-        "count": Object.defineProperty(window, 'st:02ni77:count', {
+        "count": Object.defineProperty(window, 'st:pr4cj8:count', {
             get: function() { return _s['count']; },
             set: function(v) {
                 _s['count'] = v;
@@ -32,7 +30,7 @@
                 });
             }
         }),
-        "step": Object.defineProperty(window, 'st:02ni77:step', {
+        "step": Object.defineProperty(window, 'st:pr4cj8:step', {
             get: function() { return _s['step']; },
             set: function(v) {
                 _s['step'] = v;
@@ -43,9 +41,10 @@
         })
     };
     // Initialize reactive elements with current state
-    Object.keys(_s).forEach(function(key) {
-        document.querySelectorAll('[' + _sel.replace('[', '').replace(']', '') + '="' + key + '"]').forEach(function(el) {
-            el.textContent = _s[key];
+    Object.keys(_s).forEach(function(k) {
+        var attr = _sel.replace('[', '').replace(']', '');
+        document.querySelectorAll('[' + attr + '="' + k + '"]').forEach(function(el) {
+            el.textContent = _s[k];
         });
     });
 })();

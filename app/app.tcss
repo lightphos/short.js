@@ -18,34 +18,34 @@
 }
 
 /* ─── Counter Component ─── */
-.cnt-card {
+.ct-card {
     @apply bg-white rounded-xl shadow-lg p-6 text-center;
 }
 
-.cnt-title {
+.ct-title {
     @apply text-2xl font-bold text-gray-800 mb-4;
 }
 
-.cnt-value {
+.ct-value {
     @apply text-5xl font-mono text-indigo-600 mb-4;
 }
 
-.cnt-btn-group {
+.ct-btn-group {
     @apply space-x-2;
 }
 
-.cnt-btn {
+.ct-btn {
     @apply px-4 py-2 rounded-lg font-medium transition;
 }
 
-.cnt-btn-inc {
+.ct-btn-inc {
     @apply bg-indigo-600 text-white hover:bg-indigo-700;
 }
 
-.cnt-btn-dec {
+.ct-btn-dec {
     @apply bg-gray-200 text-gray-800 hover:bg-gray-300;
 }
 
-.cnt-btn-reset {
+.ct-btn-reset {
     @apply bg-red-500 text-white hover:bg-red-600;
 }

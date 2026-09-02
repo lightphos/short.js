@@ -1,23 +1,21 @@
 import { st } from '../../short.js';
 
 export function count({ inc = 1 }) {
-    const { init, id } = st({ count: 0, step: parseInt(inc) || 1 });
+    const s = st({ count: 0, step: parseInt(inc) || 1 });
 
     return `
-        <div class="cnt-card">
-            <h2 class="cnt-title">Counter</h2>
-            <p class="cnt-value">
-                <span data-st="count"></span>
-            </p>
-            <div class="cnt-btn-group">
-                <button class="cnt-btn cnt-btn-dec"
-                    onclick="window['st:${id}:count'] -= window['st:${id}:step']">−</button>
-                <button class="cnt-btn cnt-btn-inc"
-                    onclick="window['st:${id}:count'] += window['st:${id}:step']">+</button>
-                <button class="cnt-btn cnt-btn-reset"
-                    onclick="window['st:${id}:count'] = 0">Reset</button>
+        <div class="ct-card">
+            <h2 class="ct-title">Counter</h2>
+            <p class="ct-value">${s.val('count')}</p>
+            <div class="ct-btn-group">
+                <button class="ct-btn ct-btn-dec"
+                    onclick="${s.set('count', -s.raw('step'))}">−</button>
+                <button class="ct-btn ct-btn-inc"
+                    onclick="${s.set('count', +s.raw('step'))}">+</button>
+                <button class="ct-btn ct-btn-reset"
+                    onclick="${s.set('count', 0)}">Reset</button>
             </div>
         </div>
-        ${init()}
+        ${s.init()}
     `;
 }

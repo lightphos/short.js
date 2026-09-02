@@ -120,46 +120,50 @@ export function inp({ lbl = null, ph = null, ty = 'text', cls = null }) {
 
 
 /* ─────────────────────────────────────────────────────────────
-   st(state, opts)
+   st(key | state, opts)
 
    Reactive state for short components.
 
-   Usage in a component:
-     export function myComp() {
-       const { html, init } = st({ count: 0, step: 1 });
-       return html + init();
-     }
+   String form — shorthand for a reactive <span>:
+     st('count')  →  <span data-st="count"></span>
 
-   In the template, use ${key} for initial values and
-   data-st="key" for reactive elements that update automatically.
-   Use window['st:{id}:{key}'] (bracket notation!) in event handlers,
-   because the property name contains colons.
+   Object form — full component setup:
+     const s = st({ count: 0, step: 1 });
+     return `<p>${st('count')}</p>
+       <button onclick="${s.set('count', +1)}">+</button>
+       <button onclick="${s.set('count', -1)}">−</button>` + s.init();
 
-   Example:
-     return `<div>
-       Count: <span data-st="count">${count}</span>
-       <button onclick="window['st:${id}:count'] += window['st:${id}:step']">+</button>
-     </div>` + init();
+   s.set(key, delta) generates an inline expression that mutates a
+   reactive property by the given delta (e.g. +1 → "+= 1", -2 → "-= 2",
+   or any plain number → "= N").
 
    opts.elAttr: the data attribute to use (default: "data-st")
    ───────────────────────────────────────────────────────────── */
-export function st(state = {}, opts = {}) {
+export function st(key, opts = {}) {
+    // String form: shorthand for a reactive span
+    if (typeof key === 'string') {
+        const { elAttr = 'data-st' } = opts;
+        return `<span ${elAttr}="${key}"></span>`;
+    }
+
+    // Object form: full reactive state setup
     const {
         elAttr = 'data-st',  // e.g. "data-st" → <span data-st="count">
     } = opts;
 
+    const state = key;
     const id = Math.random().toString(36).slice(2, 8);
     const keys = Object.keys(state);
 
     // Build reactive window bindings for each state key
     // e.g. window['st:abc123:count'] → setter updates all [data-st="count"] elements
-    const bindings = keys.map(key => {
-        const fullKey = `st:${id}:${key}`;
-        return `"${key}": Object.defineProperty(window, '${fullKey}', {
-            get: function() { return _s['${key}']; },
+    const bindings = keys.map(k => {
+        const fullKey = `st:${id}:${k}`;
+        return `"${k}": Object.defineProperty(window, '${fullKey}', {
+            get: function() { return _s['${k}']; },
             set: function(v) {
-                _s['${key}'] = v;
-                document.querySelectorAll('[${elAttr}="${key}"]').forEach(function(el) {
+                _s['${k}'] = v;
+                document.querySelectorAll('[${elAttr}="${k}"]').forEach(function(el) {
                     el.textContent = v;
                 });
             }
@@ -176,9 +180,10 @@ export function st(state = {}, opts = {}) {
         ${bindings}
     };
     // Initialize reactive elements with current state
-    Object.keys(_s).forEach(function(key) {
-        document.querySelectorAll('[' + _sel.replace('[', '').replace(']', '') + '="' + key + '"]').forEach(function(el) {
-            el.textContent = _s[key];
+    Object.keys(_s).forEach(function(k) {
+        var attr = _sel.replace('[', '').replace(']', '');
+        document.querySelectorAll('[' + attr + '="' + k + '"]').forEach(function(el) {
+            el.textContent = _s[k];
         });
     });
 })();
@@ -187,9 +192,31 @@ export function st(state = {}, opts = {}) {
 
     // Build HTML snippet with initial values embedded
     // Caller inserts this into their template
-    const html = keys.map(key => state[key]).join('');
+    const html = keys.map(k => state[k]).join('');
 
-    return { html, init, id, keys, state };
+    // set(key, delta) → inline expression that mutates the reactive property
+    // Positive delta → "+= N", negative delta → "-= |N|", otherwise "= val"
+    function set(k, delta) {
+        const prop = `window['st:${id}:${k}']`;
+        if (typeof delta === 'number' && Number.isFinite(delta)) {
+            if (delta > 0) return `${prop} += ${delta}`;
+            if (delta < 0) return `${prop} -= ${Math.abs(delta)}`;
+            return `${prop} = 0`;
+        }
+        return `${prop} = ${JSON.stringify(delta)}`;
+    }
+
+    // val(key) → <span data-st="key">initialVal</span> shorthand
+    function val(k) {
+        return `<span ${elAttr}="${k}">${state[k]}</span>`;
+    }
+
+    // raw(key) → initial value of that state key
+    function raw(k) {
+        return state[k];
+    }
+
+    return { html, init, id, keys, state, set, raw, val };
 }
 
 
