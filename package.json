@@ -2,9 +2,9 @@
   "type": "module",
   "scripts": {
     "build:st": "node compile/cmp.mjs",
-    "watch:st": "node compile/cmp.mjs --watch",
+    "watch:st": "node compile/cmp.mjs -o /tmp/short/ --watch",
     "tw": "npx @tailwindcss/cli -i ./app/app.tcss -o ./app/app.css --watch",
-    "dev": "npm run watch:st"
+    "dev": "rm -rf /tmp/short && mkdir -p /tmp/short && cp -R app/ /tmp/short/app/ && cp short.js /tmp/short/ && node compile/cmp.mjs -o /tmp/short/ && npx http-server /tmp/short/app -p 3000 --cors -c-1"
   },
   "dependencies": {
     "@tailwindcss/cli": "^4.3.3",

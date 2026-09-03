@@ -11,8 +11,8 @@
        <h1 class="text-4xl font-bold text-gray-800 mb-8 text-center">Short App</h1>
 
        <div class="flex flex-col gap-6">
-           <cmp v="1"></cmp>
-           <cmp v="2"></cmp>
+           <cmp v="one"></cmp>
+           <cmp v="two"></cmp>
        </div>
 
        <div class="mt-8 text-center">
@@ -20,8 +20,8 @@
        </div>
 
        <div class="mt-6 flex flex-wrap gap-4 justify-center">
-           <txts v="some text"></txts>
-           <txt2 v="some moretext"></txt2>
+           <stxt v="some text"></stxt>
+           <mtxt v="some more text"></mtxt>
        </div>
 
        <nav class="mt-10 flex gap-4 justify-center">
@@ -31,14 +31,14 @@
        </nav>
 
     </div>
-
+ß
 </body>
 
 </html>
 
 <script type="module">
-    import { txts, txt2, bcmp, cmp } from './app.js';
+    import { stxt, mtxt, bcmp, cmp } from './app.js';
     return {
-        txts, txt2, bcmp, cmp
+        stxt, mtxt, bcmp, cmp
     };
 </script>

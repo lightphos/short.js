@@ -1,15 +1,15 @@
-export function txts({v}) {
+export function stxt({v}) {
     return `
         <div class="px-4 py-2 bg-emerald-100 text-emerald-800 rounded-lg border border-emerald-200 shadow-sm">
-            <span class="font-semibold">txts:</span> ${v}
+            <span class="font-semibold">stxt:</span> ${v}
         </div>
     `;
 }
 
-export function txt2({v}) {
+export function mtxt({v}) {
     return `
         <div class="px-4 py-2 bg-amber-100 text-amber-800 rounded-lg border border-amber-200 shadow-sm">
-            <span class="font-semibold">txt2:</span> ${v}
+            <span class="font-semibold">mtxt:</span> ${v}
         </div>
     `;
 }

@@ -79,6 +79,57 @@ export function sfix(txt, cssUrl, elem  = 'short-app') {
     });
 }
 
+/* ─────────────────────────────────────────────────────────────
+   tgl(key, elements)
+   Reactive show/hide toggle.
+
+   Given a map of element ids → visibility (true = visible, false = hidden),
+   sets up a reactive boolean property on window and an init script that
+   syncs each element's 'hidden' class to the current value.
+
+   Returns:
+     init    — <script> block to embed in the template
+     show(id) — inline onclick expression to show element `id`
+     hide(id) — inline onclick expression to hide element `id`
+     toggle(id) — inline onclick expression to flip element `id`
+   ───────────────────────────────────────────────────────────── */
+export function tgl(elements) {
+    const id = Math.random().toString(36).slice(2, 8);
+    const prop = `__tgl:${id}`;
+    const keys = Object.keys(elements);
+
+    const init = `<script>
+(function() {
+    var _val = false;
+    var _els = ${JSON.stringify(elements)};
+    function _sync(v) {
+        Object.keys(_els).forEach(function(k) {
+            var el = document.getElementById(k);
+            if (!el) return;
+            if (v === _els[k]) el.classList.remove('hidden');
+            else el.classList.add('hidden');
+        });
+    }
+    Object.defineProperty(window, '${prop}', {
+        get: function() { return _val; },
+        set: function(v) { _val = v; _sync(v); }
+    });
+    _sync(false);
+})();
+<\/script>`;
+
+    function expr(id, val) {
+        return `window['${prop}'] = ${JSON.stringify(val)}; return false;`;
+    }
+
+    return {
+        init,
+        show:    (id) => expr(id, true),
+        hide:    (id) => expr(id, false),
+        toggle:  (id) => `window['${prop}'] = !window['${prop}']; return false;`,
+    };
+}
+
 /* Helpers */
 
 export function lnk({ ref, txt, cls }) {

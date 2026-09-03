@@ -1,7 +1,7 @@
 .PHONY: cmp
 
 all:
-	npx http-server ./app -p 3000 --cors -c-1
+	npx http-server /tmp/short/app -p 3000 --cors -c-1
 
 twi:
 	npm install tailwindcss @tailwindcss/cli jsdom

@@ -122,16 +122,15 @@ async function runScript(inputPath, source) {
 // ──────────────────────────────────────────────
 // Compile a single file
 // ──────────────────────────────────────────────
-async function compileFile(inputPath) {
-  // const outDir = join(projectRoot, '.', 'out');
-  // const outputPath = join(outDir, relative(projectRoot, inputPath).replace(/\.st$/i, '.html'));
-  const outputPath = relative(projectRoot, inputPath).replace(/\.st$/i, '.html');
+async function compileFile(inputPath, outDir) {
+  const relPath = relative(projectRoot, inputPath).replace(/\.st$/i, '.html');
+  const outputPath = outDir ? join(outDir, relPath) : relPath;
   mkdirSync(dirname(outputPath), { recursive: true });
 
-  console.log(`Compiling ${relative(projectRoot, inputPath)} → ${relative(projectRoot, outputPath)} ...`);
+  console.log(`Compiling ${relative(projectRoot, inputPath)} → ${outputPath} ...`);
   try {
     const source = readFileSync(inputPath, 'utf8');
-    const rs = await runScript(inputPath, source)
+    const rs = await runScript(inputPath, source);
     const compiled = compile(rs);
     writeFileSync(outputPath, compiled, 'utf8');
   } catch (err) {
@@ -161,22 +160,24 @@ function findStFiles(dir, files = []) {
 // ──────────────────────────────────────────────
 // Build all .st files
 // ──────────────────────────────────────────────
-async function buildAll() {
+async function buildAll(outDir) {
   const files = findStFiles(projectRoot);
   if (files.length === 0) {
     console.log('No .st files found.');
     return;
   }
   console.log(`Building ${files.length} file(s)...`);
-  files.forEach(await compileFile);
+  for (const f of files) {
+    await compileFile(f, outDir);
+  }
 }
 
 // ──────────────────────────────────────────────
 // Watch mode
 // ──────────────────────────────────────────────
-async function startWatch() {
+async function startWatch(outDir) {
   console.log('👀 Watching for .st file changes... (Ctrl+C to stop)\n');
-  buildAll(); // initial build
+  buildAll(outDir); // initial build
 
   // Watch the whole project recursively
   watch(projectRoot, { recursive: true }, (eventType, filename) => {
@@ -191,9 +192,9 @@ async function startWatch() {
     startWatch._timer = setTimeout(async () => {
       if (filename.toLowerCase().endsWith('.js')) {
         // Recompile all .st files that might import this .js
-        await buildAll();
+        await buildAll(outDir);
       } else {
-        compileFile(fullPath);
+        compileFile(fullPath, outDir);
       }
     }, 100);
   });
@@ -205,12 +206,25 @@ async function startWatch() {
 const args = process.argv.slice(2);
 const isWatch = args.includes('--watch') || args.includes('-w');
 
+// Parse --out / -o <dir>
+let outDir = null;
+for (let i = 0; i < args.length; i++) {
+  if ((args[i] === '--out' || args[i] === '-o') && args[i + 1] && !args[i + 1].startsWith('-')) {
+    outDir = resolve(args[i + 1]);
+    args.splice(i, 2); // remove so they don't get treated as positional
+    i--;
+  }
+}
+
+// Strip --watch / -w from args used for positional checks
+const positionalArgs = args.filter(a => a !== '--watch' && a !== '-w');
+
 if (isWatch) {
-  await startWatch();
-} else if (args.length > 0 && !args[0].startsWith('-')) {
+  await startWatch(outDir);
+} else if (positionalArgs.length > 0 && !positionalArgs[0].startsWith('-')) {
   // single file mode: node cmp/cmp.mjs path/to/file.st
-  await compileFile(resolve(args[0]));
+  await compileFile(resolve(positionalArgs[0]), outDir);
 } else {
   // default: build all
-  await buildAll();
+  await buildAll(outDir);
 }
