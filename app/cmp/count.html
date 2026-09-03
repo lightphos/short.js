@@ -10,31 +10,22 @@
             <h2 class="ct-title">Counter</h2>
             <p class="ct-value"><span data-st="count">0</span></p>
             <div class="ct-btn-group">
-                <button class="ct-btn ct-btn-dec" onclick="window['st:pr4cj8:count'] -= 1">−</button>
-                <button class="ct-btn ct-btn-inc" onclick="window['st:pr4cj8:count'] += 1">+</button>
-                <button class="ct-btn ct-btn-reset" onclick="window['st:pr4cj8:count'] = 0">Reset</button>
+                <button class="ct-btn ct-btn-dec" onclick="window['st:oco0v5:count'] -= 1">−</button>
+                <button class="ct-btn ct-btn-inc" onclick="window['st:oco0v5:count'] += 1">+</button>
+                <button class="ct-btn ct-btn-reset" onclick="window['st:oco0v5:count'] = 0">Reset</button>
             </div>
         </div>
         <script>
 (function() {
-    var _s = {"count":0,"step":1};
+    var _s = {"count":0};
     var _sel = '[data-st]';
-    var _id = 'pr4cj8';
+    var _id = 'oco0v5';
     var _bindings = {
-        "count": Object.defineProperty(window, 'st:pr4cj8:count', {
+        "count": Object.defineProperty(window, 'st:oco0v5:count', {
             get: function() { return _s['count']; },
             set: function(v) {
                 _s['count'] = v;
                 document.querySelectorAll('[data-st="count"]').forEach(function(el) {
-                    el.textContent = v;
-                });
-            }
-        }),
-        "step": Object.defineProperty(window, 'st:pr4cj8:step', {
-            get: function() { return _s['step']; },
-            set: function(v) {
-                _s['step'] = v;
-                document.querySelectorAll('[data-st="step"]').forEach(function(el) {
                     el.textContent = v;
                 });
             }

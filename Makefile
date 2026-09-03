@@ -11,3 +11,6 @@ tw:
 
 cmp.%:
 	npm run build:st -- app/$*.st
+
+dev:
+	npm run dev

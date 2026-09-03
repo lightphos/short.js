@@ -1,21 +1,22 @@
 import { st } from '../../short.js';
 
 export function count({ inc = 1 }) {
-    const s = st({ count: 0, step: parseInt(inc) || 1 });
+    const step = parseInt(inc) || 1;
+    const { getCount, setCount, init } = st.define({ count: 0 }, ['count']);
 
     return `
         <div class="ct-card">
             <h2 class="ct-title">Counter</h2>
-            <p class="ct-value">${s.val('count')}</p>
+            <p class="ct-value"><span data-st="count">${getCount()}</span></p>
             <div class="ct-btn-group">
                 <button class="ct-btn ct-btn-dec"
-                    onclick="${s.set('count', -s.raw('step'))}">−</button>
+                    onclick="${setCount(c => c - step)}">−</button>
                 <button class="ct-btn ct-btn-inc"
-                    onclick="${s.set('count', +s.raw('step'))}">+</button>
+                    onclick="${setCount(c => c + step)}">+</button>
                 <button class="ct-btn ct-btn-reset"
-                    onclick="${s.set('count', 0)}">Reset</button>
+                    onclick="${setCount(0)}">Reset</button>
             </div>
         </div>
-        ${s.init()}
+        ${init()}
     `;
 }

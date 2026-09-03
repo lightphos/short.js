@@ -216,7 +216,56 @@ export function st(key, opts = {}) {
         return state[k];
     }
 
-    return { html, init, id, keys, state, set, raw, val };
+    // bind(key | keys) → [getState, setter] (single) or { [key]: [getState, setter] } (multi)
+    // getState(key) → returns current value of that key
+    // setter accepts either a delta or an updater function (v => newV)
+    function bind(key) {
+        if (Array.isArray(key)) {
+            const result = {};
+            key.forEach(k => {
+                const getState = () => state[k];
+                const setter = (delta) => set(k, delta);
+                result[k] = [
+                    getState,
+                    (arg) => {
+                        if (typeof arg === 'function') return setter(arg(getState()));
+                        return setter(arg);
+                    }
+                ];
+            });
+            return result;
+        }
+        const getState = () => state[key];
+        const setter = (delta) => set(key, delta);
+        return [getState, (arg) => {
+            if (typeof arg === 'function') return setter(arg(getState()));
+            return setter(arg);
+        }];
+    }
+
+    return { html, init, id, keys, state, set, raw, val, bind };
 }
+
+/**
+ * st.define(state, bindKeys) → { get<Key>, set<Key>, init, id, keys, state, set, raw, val, bind }
+ * Convenience wrapper: creates state + exposes per-key getter/setter pairs.
+ * e.g. define({ count: 0 }, ['count']) → { getCount: [getter, setter], init, ... }
+ */
+// Attach to st for st.define() ergonomics (functions are objects in JS)
+st.define = define;
+
+export function define(state, bindKeys = Object.keys(state), opts = {}) {
+    const s = st(state, opts);
+    const bound = s.bind(bindKeys);
+    const result = { init: s.init, id: s.id, keys: s.keys, state: s.state, set: s.set, raw: s.raw, val: s.val, bind: s.bind };
+    bindKeys.forEach(k => {
+        const [get, set] = bound[k];
+        result[`get${capitalize(k)}`] = get;
+        result[`set${capitalize(k)}`] = set;
+    });
+    return result;
+}
+
+function capitalize(s) { return s[0].toUpperCase() + s.slice(1); }
 
 
