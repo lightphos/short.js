@@ -3,7 +3,7 @@ import { st } from '../../short.js';
 export function count({ inc = 1 }) {
     const step = parseInt(inc) || 1;
     const { getCount, setCount, init } = st.define({ count: 0 }, ['count']);
-
+    
     return `
         <div class="ct-card">
             <h2 class="ct-title">Counter</h2>
@@ -17,6 +17,6 @@ export function count({ inc = 1 }) {
                     onclick="${setCount(0)}">Reset</button>
             </div>
         </div>
-        ${init()}
+        ${init}
     `;
 }

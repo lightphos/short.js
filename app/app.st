@@ -8,7 +8,7 @@
 
 <body class="bg-gradient-to-br from-indigo-100 to-purple-100 min-h-screen">
     <div id="short" class="max-w-2xl mx-auto p-8">
-       <h1 class="text-4xl font-bold text-gray-800 mb-8 text-center">My App</h1>
+       <h1 class="text-4xl font-bold text-gray-800 mb-8 text-center">Short App</h1>
 
        <div class="flex flex-col gap-6">
            <cmp v="1"></cmp>
@@ -27,7 +27,7 @@
        <nav class="mt-10 flex gap-4 justify-center">
            <a href="./cmp/user.html" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition">User</a>
            <a href="./cmp/form.html" class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition">Form</a>
-           <a href="./cmp/count.html" class="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition">Count</a>
+           <a href="./kit/count.html" class="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition">Count</a>
        </nav>
 
     </div>

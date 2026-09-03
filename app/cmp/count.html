@@ -10,36 +10,12 @@
             <h2 class="ct-title">Counter</h2>
             <p class="ct-value"><span data-st="count">0</span></p>
             <div class="ct-btn-group">
-                <button class="ct-btn ct-btn-dec" onclick="window['st:oco0v5:count'] -= 1">−</button>
-                <button class="ct-btn ct-btn-inc" onclick="window['st:oco0v5:count'] += 1">+</button>
-                <button class="ct-btn ct-btn-reset" onclick="window['st:oco0v5:count'] = 0">Reset</button>
+                <button class="ct-btn ct-btn-dec" onclick="window['st:801qan:count'] -= 1">−</button>
+                <button class="ct-btn ct-btn-inc" onclick="window['st:801qan:count'] += 1">+</button>
+                <button class="ct-btn ct-btn-reset" onclick="window['st:801qan:count'] = 0">Reset</button>
             </div>
         </div>
-        <script>
-(function() {
-    var _s = {"count":0};
-    var _sel = '[data-st]';
-    var _id = 'oco0v5';
-    var _bindings = {
-        "count": Object.defineProperty(window, 'st:oco0v5:count', {
-            get: function() { return _s['count']; },
-            set: function(v) {
-                _s['count'] = v;
-                document.querySelectorAll('[data-st="count"]').forEach(function(el) {
-                    el.textContent = v;
-                });
-            }
-        })
-    };
-    // Initialize reactive elements with current state
-    Object.keys(_s).forEach(function(k) {
-        var attr = _sel.replace('[', '').replace(']', '');
-        document.querySelectorAll('[' + attr + '="' + k + '"]').forEach(function(el) {
-            el.textContent = _s[k];
-        });
-    });
-})();
-</script>
+
     
 
 

@@ -257,7 +257,8 @@ st.define = define;
 export function define(state, bindKeys = Object.keys(state), opts = {}) {
     const s = st(state, opts);
     const bound = s.bind(bindKeys);
-    const result = { init: s.init, id: s.id, keys: s.keys, state: s.state, set: s.set, raw: s.raw, val: s.val, bind: s.bind };
+    // Pre-evaluate init() — returns the <script> string ready to embed
+    const result = { init: s.init(), id: s.id, keys: s.keys, state: s.state, set: s.set, raw: s.raw, val: s.val, bind: s.bind };
     bindKeys.forEach(k => {
         const [get, set] = bound[k];
         result[`get${capitalize(k)}`] = get;
