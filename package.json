@@ -4,11 +4,15 @@
     "build:st": "node compile/cmp.mjs",
     "watch:st": "node compile/cmp.mjs -o /tmp/short/ --watch",
     "tw": "npx @tailwindcss/cli -i ./app/app.tcss -o ./app/app.css --watch",
-    "dev": "rm -rf /tmp/short && mkdir -p /tmp/short && cp -R app/ /tmp/short/app/ && cp short.js /tmp/short/ && node compile/cmp.mjs -o /tmp/short/ && npx http-server /tmp/short/app -p 3000 --cors -c-1"
+    "server": "npx http-server /tmp/short/app -p 3000 --cors -c-1",
+    "watch": "concurrently \"npm run tw\" \"npm run watch:st\" \"npm run server\""
   },
   "dependencies": {
     "@tailwindcss/cli": "^4.3.3",
     "jsdom": "^30.0.1",
     "tailwindcss": "^4.3.3"
+  },
+  "devDependencies": {
+    "concurrently": "^10.0.5"
   }
 }

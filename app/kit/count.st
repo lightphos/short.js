@@ -5,8 +5,11 @@
 </head>
 
 <body class="bg-linear-to-br from-indigo-100 to-purple-100 min-h-screen flex flex-col items-center justify-center">
-    <back></back>
-    <count inc="1"></count>
+    <div class="max-w-md mx-auto">
+        <back></back>
+        <br/>
+        <count inc="1"></count>
+    </div>
 </body>
 
 <script>

@@ -6,10 +6,7 @@
 
 <body class="bg-gradient-to-br from-slate-100 to-blue-100 min-h-screen p-8">
     <div class="max-w-md mx-auto">
-        <a href="../app.html" class="inline-flex items-center gap-2 text-indigo-600 hover:text-indigo-800 mb-6 transition">
-            <span class="text-xl">←</span>
-            <span class="font-medium">Back to App</span>
-        </a>
+        <back></back>
 
         <div class="bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
             <div class="flex flex-col items-center text-center">
@@ -49,5 +46,9 @@
 </body>
 
 <script type="module">
-    return {};
+    import {back} from '../app.js';
+
+    return {
+        back
+    };
 </script>

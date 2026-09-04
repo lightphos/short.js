@@ -224,6 +224,9 @@
   }
 }
 @layer utilities {
+  .visible {
+    visibility: visible;
+  }
   .relative {
     position: relative;
   }
@@ -287,6 +290,9 @@
   .hidden {
     display: none;
   }
+  .inline {
+    display: inline;
+  }
   .inline-flex {
     display: inline-flex;
   }
@@ -319,6 +325,9 @@
   }
   .flex-1 {
     flex: 1;
+  }
+  .cursor-pointer {
+    cursor: pointer;
   }
   .resize-none {
     resize: none;

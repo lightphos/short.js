@@ -14,3 +14,6 @@ cmp.%:
 
 dev:
 	npm run dev
+
+watch:
+	npm run watch:st

@@ -6,8 +6,8 @@
 </head>
 
 <body class="bg-linear-to-br from-blue-50 to-indigo-100 min-h-screen p-8">
+    <back></back>
     <div class="max-w-md mx-auto space-y-8">
-
         <auth></auth>
     </div>
 </body>
@@ -15,8 +15,9 @@
 
 <script type="module">
     import {auth, usr, pwd, sub} from './form.js';
+    import {back} from '../app.js';
 
     return {
-        auth, usr, pwd, sub
+        auth, usr, pwd, sub, back
     };
 </script>
