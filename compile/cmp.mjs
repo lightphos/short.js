@@ -72,8 +72,36 @@ async function runScript(inputPath, source) {
         try { unlinkSync(tmpPath); } catch {}
     }
 
+    // Build case-insensitive component lookup (jsdom lowercases tag names)
+    const componentLookup = {};
+    for (const key of Object.keys(components)) {
+        componentLookup[key.toLowerCase()] = components[key];
+    }
+
+    // Extract variable names from the return statement for interpolation
+    const returnMatch = scriptCode.match(/return\s*\{([^}]*)\}/);
+    const varNames = returnMatch ? returnMatch[1].split(',').map(n => n.trim()).filter(Boolean) : [];
+
+    // Evaluate ${...} interpolations, storing real values for attribute passing
+    const interpValues = {};
+    let processedSource = source;
+    if (varNames.length > 0) {
+        const interpRe = /\$\{([^}]+)\}/g;
+        processedSource = processedSource.replace(interpRe, (match, expr) => {
+            try {
+                const fn = new Function(...varNames, `return (${expr})`);
+                const result = fn(...varNames.map(n => components[n]));
+                const key = `__interp_${Object.keys(interpValues).length}`;
+                interpValues[key] = result;
+                return key;
+            } catch (e) {
+                return match;
+            }
+        });
+    }
+
     // Remove the script tag so jsdom doesn't try to parse it
-    const bodyHtml = source.replace(scriptMatch[0], '');
+    const bodyHtml = processedSource.replace(scriptMatch[0], '');
 
     // Parse with jsdom for proper HTML handling
     const dom = new JSDOM(bodyHtml);
@@ -85,18 +113,41 @@ async function runScript(inputPath, source) {
         const children = Array.from(node.childNodes);
         for (const child of children) {
             if (child.nodeType === 1) { // element
+                // Resolve interpolation placeholders in all attributes.
+                // Function-valued props must remain callable, so they are stored on the
+                // DOM element itself instead of being coerced into a string attribute.
+                for (const attr of child.attributes) {
+                    if (attr.value in interpValues) {
+                        const actual = interpValues[attr.value];
+                        if (typeof actual === 'function') {
+                            child[attr.name] = actual;
+                        } else {
+                            attr.value = actual;
+                        }
+                    }
+                }
                 const tagName = child.tagName.toLowerCase();
-                if (typeof components[tagName] === 'function') {
-                    // Get attributes
+                const componentFn = componentLookup[tagName];
+                if (typeof componentFn === 'function' || typeof componentFn === 'string') {
+                    // Get attributes. Preserve function-valued props from the element
+                    // instance rather than from the DOM attribute string.
                     const attrs = {};
                     for (const attr of child.attributes) {
-                        attrs[attr.name] = attr.value;
+                        let val = child[attr.name];
+                        if (typeof val === 'undefined') {
+                            val = attr.value;
+                        }
+                        if (val in interpValues) {
+                            val = interpValues[val];
+                        }
+                        attrs[attr.name] = val;
                     }
                     // Render the component (passing sh as first arg)
-                    const rendered = components[tagName]({ sh, ...attrs });
+                    const rendered = typeof componentFn === 'function'
+                        ? componentFn({ sh, ...attrs })
+                        : componentFn;
                     // Parse the rendered HTML and replace the element
                     const tmpDoc = new JSDOM('');
-                    const frag = tmpDoc.window.document.createDocumentFragment();
                     const tmpBody = tmpDoc.window.document.body;
                     tmpBody.innerHTML = rendered;
                     // Process recursively
@@ -207,7 +258,7 @@ const args = process.argv.slice(2);
 const isWatch = args.includes('--watch') || args.includes('-w');
 
 // Parse --out / -o <dir>
-let outDir = null;
+let outDir = '/tmp/short';
 for (let i = 0; i < args.length; i++) {
   if ((args[i] === '--out' || args[i] === '-o') && args[i + 1] && !args[i + 1].startsWith('-')) {
     outDir = resolve(args[i + 1]);

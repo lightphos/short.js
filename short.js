@@ -191,23 +191,16 @@ export function inp({ lbl = null, ph = null, ty = 'text', cls = null }) {
    opts.elAttr: the data attribute to use (default: "data-st")
    ───────────────────────────────────────────────────────────── */
 export function st(key, opts = {}) {
-    // String form: shorthand for a reactive span
     if (typeof key === 'string') {
         const { elAttr = 'data-st' } = opts;
         return `<span ${elAttr}="${key}"></span>`;
     }
 
-    // Object form: full reactive state setup
-    const {
-        elAttr = 'data-st',  // e.g. "data-st" → <span data-st="count">
-    } = opts;
-
+    const { elAttr = 'data-st' } = opts;
     const state = key;
     const id = Math.random().toString(36).slice(2, 8);
     const keys = Object.keys(state);
 
-    // Build reactive window bindings for each state key
-    // e.g. window['st:abc123:count'] → setter updates all [data-st="count"] elements
     const bindings = keys.map(k => {
         const fullKey = `st:${id}:${k}`;
         return `"${k}": Object.defineProperty(window, '${fullKey}', {
@@ -221,8 +214,7 @@ export function st(key, opts = {}) {
         })`;
     }).join(',\n        ');
 
-    const init = function() {
-        return `<script>
+    const init = () => `<script>
 (function() {
     var _s = ${JSON.stringify(state)};
     var _sel = '[${elAttr}]';
@@ -230,7 +222,6 @@ export function st(key, opts = {}) {
     var _bindings = {
         ${bindings}
     };
-    // Initialize reactive elements with current state
     Object.keys(_s).forEach(function(k) {
         var attr = _sel.replace('[', '').replace(']', '');
         document.querySelectorAll('[' + attr + '="' + k + '"]').forEach(function(el) {
@@ -239,14 +230,9 @@ export function st(key, opts = {}) {
     });
 })();
 <\/script>`;
-    };
 
-    // Build HTML snippet with initial values embedded
-    // Caller inserts this into their template
     const html = keys.map(k => state[k]).join('');
 
-    // set(key, delta) → inline expression that mutates the reactive property
-    // Positive delta → "+= N", negative delta → "-= |N|", otherwise "= val"
     function set(k, delta) {
         const prop = `window['st:${id}:${k}']`;
         if (typeof delta === 'number' && Number.isFinite(delta)) {
@@ -257,19 +243,14 @@ export function st(key, opts = {}) {
         return `${prop} = ${JSON.stringify(delta)}`;
     }
 
-    // val(key) → <span data-st="key">initialVal</span> shorthand
     function val(k) {
         return `<span ${elAttr}="${k}">${state[k]}</span>`;
     }
 
-    // raw(key) → initial value of that state key
     function raw(k) {
         return state[k];
     }
 
-    // bind(key | keys) → [getState, setter] (single) or { [key]: [getState, setter] } (multi)
-    // getState(key) → returns current value of that key
-    // setter accepts either a delta or an updater function (v => newV)
     function bind(key) {
         if (Array.isArray(key)) {
             const result = {};
@@ -286,6 +267,7 @@ export function st(key, opts = {}) {
             });
             return result;
         }
+
         const getState = () => state[key];
         const setter = (delta) => set(key, delta);
         return [getState, (arg) => {
@@ -297,24 +279,28 @@ export function st(key, opts = {}) {
     return { html, init, id, keys, state, set, raw, val, bind };
 }
 
-/**
- * st.define(state, bindKeys) → { get<Key>, set<Key>, init, id, keys, state, set, raw, val, bind }
- * Convenience wrapper: creates state + exposes per-key getter/setter pairs.
- * e.g. define({ count: 0 }, ['count']) → { getCount: [getter, setter], init, ... }
- */
-// Attach to st for st.define() ergonomics (functions are objects in JS)
 st.define = define;
 
 export function define(state, bindKeys = Object.keys(state), opts = {}) {
     const s = st(state, opts);
     const bound = s.bind(bindKeys);
-    // Pre-evaluate init() — returns the <script> string ready to embed
-    const result = { init: s.init(), id: s.id, keys: s.keys, state: s.state, set: s.set, raw: s.raw, val: s.val, bind: s.bind };
+    const result = {
+        init: s.init(),
+        id: s.id,
+        keys: s.keys,
+        state: s.state,
+        set: s.set,
+        raw: s.raw,
+        val: s.val,
+        bind: s.bind,
+    };
+
     bindKeys.forEach(k => {
         const [get, set] = bound[k];
         result[`get${capitalize(k)}`] = get;
         result[`set${capitalize(k)}`] = set;
     });
+
     return result;
 }
 

@@ -1,11 +1,13 @@
 {
   "type": "module",
   "scripts": {
-    "build:st": "node compile/cmp.mjs",
+    "build:st": "node compile/cmp.mjs -o /tmp/short/",
     "watch:st": "node compile/cmp.mjs -o /tmp/short/ --watch",
-    "tw": "npx @tailwindcss/cli -i ./app/app.tcss -o ./app/app.css --watch",
+    "tw": "npx @tailwindcss/cli -i ./app/app.tcss -o /tmp/short/app/app.css --watch",
     "server": "npx http-server /tmp/short/app -p 3000 --cors -c-1",
-    "watch": "concurrently \"npm run tw\" \"npm run watch:st\" \"npm run server\""
+    "watch": "concurrently \"npm run tw\" \"npm run watch:st\" \"npm run server\" \"npm run watch:assets\"",
+    "copy:assets": "find app short.js -type f \\( -name '*.js' -o -name '*.css' -o -name '*.html' \\) -exec sh -c 'for f; do mkdir -p \"/tmp/short/$(dirname \"$f\")\" && cp \"$f\" \"/tmp/short/$f\"; done' sh {} +",
+    "watch:assets": "npm run copy:assets && onchange 'app/**/*.js' 'app/**/*.css' 'app/**/*.html' 'short.js' -- sh -c 'f=$1; mkdir -p \"/tmp/short/$(dirname \"$f\")\" && cp \"$f\" \"/tmp/short/$f\"' -- {}"
   },
   "dependencies": {
     "@tailwindcss/cli": "^4.3.3",
@@ -13,6 +15,7 @@
     "tailwindcss": "^4.3.3"
   },
   "devDependencies": {
-    "concurrently": "^10.0.5"
+    "concurrently": "^10.0.5",
+    "onchange": "^7.1.0"
   }
 }

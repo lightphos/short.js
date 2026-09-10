@@ -14,8 +14,8 @@
 
 
 <script type="module">
-    import {auth, usr, pwd, sub} from './form.js';
-    import {back} from '../app.js';
+    import { auth, usr, pwd, sub } from './form.js';
+    import { back } from '../app.js';
 
     return {
         auth, usr, pwd, sub, back
