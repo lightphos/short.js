@@ -10,7 +10,15 @@
        <back></back>
 
        <br/>
-       <banner v="Counter Demo"></banner>
+       <state of="counter"></state>
+       <p/>
+       <hr/>
+       <gets of="counter"></gets>
+       <hr/>
+        <button class="ct-btn" onclick="${upds('counter', 3)}">
+            Set Counter</button>
+       <p/>
+       <banner v="Counter Banner"></banner>
        <div class="ct-card">
             <h2 class="ct-title">Counter</h2>
             <p class="ct-value">[
@@ -31,12 +39,12 @@
 
 <init></init>
 <script type="module">
-    import { st } from '../../short.js';
+    import { st, state, gets, upds } from '../../short.js';
     import { back } from '../app.js';
     import { getState, banner } from './count.js';
 
     const { getCount, setCount, init } = st.define({ count: 0 }, ['count']);
 
-    return { back, getCount, setCount, getState, banner, init };
+    return { back, getCount, setCount, getState, banner, init, state, gets, upds };
 
 </script>

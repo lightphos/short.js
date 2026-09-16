@@ -1,29 +1,18 @@
 export function fix(content) {
     document.addEventListener('DOMContentLoaded', () => {
         var div = document.getElementById("short");
-        console.log("div == " + JSON.stringify(div))
         if (!div) {
-            console.log("Create short div");
             var div = document.createElement('div');
             div.id = 'short';
         } else {
             console.log("As script")
             const short = document.querySelector('#short');
-
-            const html = short.outerHTML;
-            short.parentNode.removeChild(short);
-            console.log(html);
-               console.log('Copied text:', html);
-    console.log(
-        'Still in DOM:',
-        document.querySelector('#short')
-    );
+            short.parentNode.removeChild(short);    
         }
         if (content) {
           div.innerHTML = content;
         }
         document.body.appendChild(div);
-        console.log("Fixed " + Object.keys(this));
     });
 }
 
@@ -306,4 +295,20 @@ export function define(state, bindKeys = Object.keys(state), opts = {}) {
 
 function capitalize(s) { return s[0].toUpperCase() + s.slice(1); }
 
+var stateObj = new Map();
 
+export function state({ of }) {
+    const { init, val, raw, set, getCounter, setCounter} = define({counter: 7}, ['counter'])
+    stateObj.set(of, { val, raw, set, getCounter, setCounter });
+    return `<span data-st="${of}"></span>${init}`;
+}
+
+export function gets({ of }) {
+  const { raw } = stateObj.get(of);
+  return raw(of) + 1;
+}
+
+export function upds(of, to) {
+  const { set } = stateObj.get(of);
+  return set(of, to);
+}

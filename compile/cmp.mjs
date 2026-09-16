@@ -8,6 +8,63 @@ import { JSDOM } from 'jsdom';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const projectRoot = resolve(__dirname, '..'); // assume cmp/ is inside project root
 
+function replaceInterpolations(source, replace) {
+  let output = '';
+  let cursor = 0;
+
+  while (cursor < source.length) {
+    const start = source.indexOf('${', cursor);
+    if (start === -1) {
+      output += source.slice(cursor);
+      break;
+    }
+
+    output += source.slice(cursor, start);
+
+    let end = start + 2;
+    let depth = 0;
+    let quote = null;
+    let escaped = false;
+
+    for (; end < source.length; end += 1) {
+      const char = source[end];
+
+      if (quote) {
+        if (escaped) {
+          escaped = false;
+        } else if (char === '\\') {
+          escaped = true;
+        } else if (char === quote) {
+          quote = null;
+        }
+        continue;
+      }
+
+      if (char === '"' || char === "'" || char === '`') {
+        quote = char;
+      } else if (char === '(' || char === '[' || char === '{') {
+        depth += 1;
+      } else if (char === '}') {
+        if (depth === 0) break;
+        depth -= 1;
+      } else if ((char === ')' || char === ']') && depth > 0) {
+        depth -= 1;
+      }
+    }
+
+    if (end === source.length || depth !== 0) {
+      output += source.slice(start);
+      break;
+    }
+
+    const expression = source.slice(start + 2, end);
+    output += replace(source.slice(start, end + 1), expression);
+    cursor = end + 1;
+  }
+
+  return output;
+}
+
 function compile(sxSource) {
   let html = sxSource;
   // 1. Fix <style src="..."> -> <link rel="stylesheet" href="...">
@@ -86,8 +143,7 @@ async function runScript(inputPath, source) {
     const interpValues = {};
     let processedSource = source;
     if (varNames.length > 0) {
-        const interpRe = /\$\{([^}]+)\}/g;
-        processedSource = processedSource.replace(interpRe, (match, expr) => {
+      processedSource = replaceInterpolations(processedSource, (match, expr) => {
             try {
                 const fn = new Function(...varNames, `return (${expr})`);
                 const result = fn(...varNames.map(n => components[n]));
