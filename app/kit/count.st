@@ -9,9 +9,7 @@
 
        <back></back>
 
-       <div>
        <banner v="Counter Banner"></banner>
-       </div>
        <p/>
        <div class="mb-5">
         <button class="ct-btn ct-btn-inc" onclick="setSomething('{some: \'one\'}')">
