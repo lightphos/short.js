@@ -185,10 +185,11 @@ export function st(key, opts = {}) {
         return `<span ${elAttr}="${key}"></span>`;
     }
 
-    const { elAttr = 'data-st' } = opts;
+    const { elAttr = 'data-st', scoped = false } = opts;
     const state = key;
     const id = Math.random().toString(36).slice(2, 8);
     const keys = Object.keys(state);
+    const marker = k => scoped ? `${id}:${k}` : k;
 
     const bindings = keys.map(k => {
         const fullKey = `st:${id}:${k}`;
@@ -196,7 +197,7 @@ export function st(key, opts = {}) {
             get: function() { return _s['${k}']; },
             set: function(v) {
                 _s['${k}'] = v;
-                document.querySelectorAll('[${elAttr}="${k}"]').forEach(function(el) {
+                document.querySelectorAll('[${elAttr}="${marker(k)}"]').forEach(function(el) {
                     el.textContent = v;
                 });
             }
@@ -207,13 +208,29 @@ export function st(key, opts = {}) {
 (function() {
     var _s = ${JSON.stringify(state)};
     var _sel = '[${elAttr}]';
+    var _scope = '${scoped ? id + ':' : ''}';
     var _id = '${id}';
+    var _api = {
+        get: function(k) { return _s[k]; },
+        set: function(k, v) {
+            _s[k] = v;
+            document.querySelectorAll('[${elAttr}="' + _scope + k + '"]').forEach(function(el) {
+                el.textContent = v;
+            });
+        }
+    };
     var _bindings = {
         ${bindings}
     };
     Object.keys(_s).forEach(function(k) {
+        var name = k.charAt(0).toUpperCase() + k.slice(1);
+        _api['get' + name] = function() { return _api.get(k); };
+        _api['set' + name] = function(v) { _api.set(k, v); };
+    });
+    window['st:' + _id] = _api;
+    Object.keys(_s).forEach(function(k) {
         var attr = _sel.replace('[', '').replace(']', '');
-        document.querySelectorAll('[' + attr + '="' + k + '"]').forEach(function(el) {
+        document.querySelectorAll('[' + attr + '="' + _scope + k + '"]').forEach(function(el) {
             el.textContent = _s[k];
         });
     });
@@ -233,7 +250,7 @@ export function st(key, opts = {}) {
     }
 
     function val(k) {
-        return `<span ${elAttr}="${k}">${state[k]}</span>`;
+        return `<span ${elAttr}="${marker(k)}">${state[k]}</span>`;
     }
 
     function raw(k) {
@@ -297,18 +314,38 @@ function capitalize(s) { return s[0].toUpperCase() + s.slice(1); }
 
 var stateObj = new Map();
 
-export function state({ of }) {
-    const { init, val, raw, set, getCounter, setCounter} = define({counter: 7}, ['counter'])
-    stateObj.set(of, { val, raw, set, getCounter, setCounter });
-    return `<span data-st="${of}"></span>${init}`;
+export function state({ of, val = 0 }) {
+    const initialValue = typeof val === 'string' && val.trim() !== '' && Number.isFinite(Number(val))
+        ? Number(val)
+        : val;
+    const state = { [of]: initialValue };
+    const accessors = define(state, [of], { scoped: true });
+    const { init, id, raw, set } = accessors;
+    const get = accessors[`get${capitalize(of)}`];
+    const update = accessors[`set${capitalize(of)}`];
+    const namedInit = init.replace(
+        '</script>',
+        `window['st:${of}'] = window['st:${id}'];
+window['get${capitalize(of)}'] = window['st:${id}']['get${capitalize(of)}'];
+window['set${capitalize(of)}'] = window['st:${id}']['set${capitalize(of)}'];
+</script>`
+    );
+    stateObj.set(of, { id, val, raw, set, get, update });
+    return `<span data-st="${id}:${of}"></span>${namedInit}`;
 }
 
-export function gets({ of }) {
-  const { raw } = stateObj.get(of);
-  return raw(of) + 1;
+export function gets(value) {
+    const of = typeof value === 'string' ? value : value.of;
+    if (typeof value === 'string') {
+        return `window['st:${of}'].get${capitalize(of)}()`;
+    }
+    const { raw } = stateObj.get(of);
+    return raw(of);
 }
 
 export function upds(of, to) {
-  const { set } = stateObj.get(of);
-  return set(of, to);
+    const value = typeof to === 'string' && to.startsWith('window[')
+        ? `(${to})`
+        : JSON.stringify(to);
+    return `window['st:${of}'].set${capitalize(of)}(${value})`;
 }

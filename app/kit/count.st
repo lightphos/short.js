@@ -9,29 +9,37 @@
 
        <back></back>
 
-       <br/>
-       <state of="counter"></state>
-       <p/>
-       <hr/>
-       <gets of="counter"></gets>
-       <hr/>
-        <button class="ct-btn" onclick="${upds('counter', 3)}">
-            Set Counter</button>
-       <p/>
+       <div>
        <banner v="Counter Banner"></banner>
-       <div class="ct-card">
-            <h2 class="ct-title">Counter</h2>
-            <p class="ct-value">[
-                <getState gfn="${getCount}"></getState>
-                ]
+       </div>
+       <p/>
+       <div class="mb-5">
+        <button class="ct-btn ct-btn-inc" onclick="setSomething('{some: \'one\'}')">
+            To one
+        </button>
+        <state of="something" val="{ some: 'thing'}"></state>
+       </div>
+       
+       <span class="ct-btn-group">
+          <button class="ct-btn ct-btn-inc" onclick="setCounter(getCounter() + 2)">
+            Set Counter
+            [<state of="counter" val="3"></state>]
+          </button>
+       </span>
+
+       <p/>
+       <div class="ct-card mt-5">
+            <h2 class="ct-title">Count</h2>
+            <p class="ct-value">
+                <state of="count"></state>
             </p>
             <div class="ct-btn-group">
                 <button class="ct-btn ct-btn-dec"
-                    onclick="${setCount(c => c - 1)}">−</button>
+                    onclick="setCount(getCount() - 1)">−</button>
                 <button class="ct-btn ct-btn-inc"
-                    onclick="${setCount(c => c + 1)}">+</button>
+                    onclick="setCount(getCount() + 1)">+</button>
                 <button class="ct-btn ct-btn-reset"
-                    onclick="${setCount(0)}">Reset</button>
+                    onclick="setCount(0)">Reset</button>
             </div>
         </div>
     </div>
@@ -39,12 +47,10 @@
 
 <init></init>
 <script type="module">
-    import { st, state, gets, upds } from '../../short.js';
+    import { state } from '../../short.js';
     import { back } from '../app.js';
-    import { getState, banner } from './count.js';
+    import { banner } from './count.js';
 
-    const { getCount, setCount, init } = st.define({ count: 0 }, ['count']);
-
-    return { back, getCount, setCount, getState, banner, init, state, gets, upds };
+    return { back, banner, state };
 
 </script>
