@@ -21,14 +21,14 @@
 
        <div class="mt-6 flex flex-wrap gap-4 justify-center">
            <stxt v="some text"></stxt>
-           <mtxt v="some more text"></mtxt>
+           <mtxt v="more text"></mtxt>
        </div>
 
        <nav class="mt-10 flex gap-4 justify-center">
            <a href="./kit/user.html" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition">User</a>
            <a href="./kit/form.html" class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition">Form</a>
            <a href="./kit/states.html" class="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition">States</a>
-           <a href="./kit/toggle.html" class="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition">Toggle</a>
+           <a href="./kit/toggle.html" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition">Toggle</a>
        </nav>
     </div>
 </body>

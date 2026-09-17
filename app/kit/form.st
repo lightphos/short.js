@@ -15,7 +15,7 @@
             <sub></sub>
             <div class="text-center text-sm text-gray-600">
                 Don't have an account?
-                <a href="#" onclick="${tglf.toggle('sif')}"
+                <a href="#" onclick="${tglf('sif')}"
                    class="text-indigo-600 hover:text-indigo-800 font-medium cursor-pointer">
                    Sign Up</a>
            </div>
@@ -24,11 +24,11 @@
             <h2 class="text-3xl font-bold text-center text-gray-800">Sign Up</h2>
             <usr username="Username"></usr>
             <pwd password="Password"></pwd>
-            <pwd password="Confirm Password"></pwd>
+            <pwd password="Confirm Password" placeholder="Confirm your password"></pwd>
             <sub></sub>
             <div class="text-center text-sm text-gray-600">
                 Already have an account?
-                <a href="#" onclick="${tglf.toggle('suf')}"
+                <a href="#" onclick="${tglf('suf')}"
                    class="text-indigo-600 hover:text-indigo-800 font-medium cursor-pointer">
                    Sign In</a>
            </div>

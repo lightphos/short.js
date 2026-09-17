@@ -337,6 +337,10 @@ async function startWatch(outDir) {
 
   // Watch the whole project recursively
   watch(projectRoot, { recursive: true }, (eventType, filename) => {
+    if (!filename) {
+      return;
+    }
+
     if (!filename.toLowerCase().endsWith('.st') &&
         !filename.toLowerCase().endsWith('.js')) {
       return;

@@ -9,18 +9,19 @@
     <back></back>
 
     <div>
-
+    <banner n="Toggles"></banner>
+    
     <button id="bhi" class="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700"
-            onclick="${tglb.toggle('bhi')}">Hi</button>
+            onclick="${tglb('bhi')}">Hi</button>
     <button id="bbye" class="hidden bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700"
-            onclick="${tglb.toggle('bbye')}">Bye</button>
+            onclick="${tglb('bbye')}">Bye</button>
 
     <p/>
     <br/>
     <button id="byes" class="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700"
-            onclick="${tglyn.toggle('byes')}">Yes</button>
+            onclick="${tglyn('byes')}">Yes</button>
     <button id="bno" class="hidden bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700"
-            onclick="${tglyn.toggle('bno')}">No</button>
+            onclick="${tglyn('bno')}">No</button>
 
     </div>
     ${tglb.init}
@@ -29,12 +30,12 @@
 </body>
 
 <script type="module">
-    import { back } from '../app.js';
+    import { back, banner } from '../app.js';
     import { tgl } from '../../short.js';
 
     const tglb = tgl({ bhi: false, bbye: true });
     const tglyn = tgl({ byes: false, bno: true });
     return {
-        back, tglb, tglyn
+        back, banner, tglb, tglyn
     };
 </script>

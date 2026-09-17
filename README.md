@@ -19,6 +19,14 @@ A lightweight JavaScript library for building modular web components with Shadow
 npm install
 ```
 
+With Bun installed, use the Bun-specific workflows:
+
+```bash
+bun install
+bun run watch:bun
+bun run test:bun
+```
+
 ### Compile Templates
 
 ```bash

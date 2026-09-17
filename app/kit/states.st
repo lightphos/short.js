@@ -9,7 +9,7 @@
 
        <back></back>
 
-       <banner v="States Banner"></banner>
+       <banner n="States Banner"></banner>
        <p/>
        <div class="mb-5">
         <button class="ct-btn ct-btn-inc" onclick="setSomething('{some: \'one\'}')">

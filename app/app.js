@@ -1,7 +1,7 @@
 export function stxt({v}) {
     return `
         <div class="px-4 py-2 bg-emerald-100 text-emerald-800 rounded-lg border border-emerald-200 shadow-sm">
-            <span class="font-semibold">stxt:</span> ${v}
+            <span class="font-semibold"></span> ${v}
         </div>
     `;
 }
@@ -9,7 +9,7 @@ export function stxt({v}) {
 export function mtxt({v}) {
     return `
         <div class="px-4 py-2 bg-amber-100 text-amber-800 rounded-lg border border-amber-200 shadow-sm">
-            <span class="font-semibold">mtxt:</span> ${v}
+            <span class="font-semibold"></span> ${v}
         </div>
     `;
 }
@@ -43,10 +43,10 @@ export function back() {
     `;
 }
 
-export function banner({v}) {
+export function banner({n}) {
     return `
        <h2 class="bg-indigo-100 text-indigo-800  text-4l font-bold text-gray-700 mb-8 text-center">
-        ${v}
+        ${n}
        </h2>
     `;
 }

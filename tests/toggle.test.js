@@ -16,7 +16,14 @@ describe('toggle.st compiler output', () => {
     });
 
     const html = readFileSync(join(outDir, 'app', 'kit', 'toggle.html'), 'utf8');
-    const dom = new JSDOM(html, { runScripts: 'dangerously' });
+    const dom = new JSDOM(html, { runScripts: 'outside-only' });
+    for (const script of dom.window.document.scripts) {
+      if (script.textContent) dom.window.eval(script.textContent);
+    }
+    for (const element of dom.window.document.querySelectorAll('[onclick]')) {
+      const handler = element.getAttribute('onclick');
+      element.onclick = dom.window.eval(`(function(event) { ${handler} })`);
+    }
     const { document } = dom.window;
 
     const bhi = document.getElementById('bhi');

@@ -112,12 +112,15 @@ export function tgl(elements) {
         return `window['${prop}'] = ${JSON.stringify(val)}; return false;`;
     }
 
-    return {
+    const toggle = (id) => `window['${prop}'] = !window['${prop}']; return false;`;
+    const controller = (id) => toggle(id);
+
+    return Object.assign(controller, {
         init,
-        show:    (id) => expr(id, true),
-        hide:    (id) => expr(id, false),
-        toggle:  (id) => `window['${prop}'] = !window['${prop}']; return false;`,
-    };
+        show: (id) => expr(id, true),
+        hide: (id) => expr(id, false),
+        toggle,
+    });
 }
 
 /* Helpers */
