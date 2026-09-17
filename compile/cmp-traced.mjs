@@ -348,7 +348,7 @@ const args = process.argv.slice(2);
 const isWatch = args.includes('--watch') || args.includes('-w');
 
 // Parse --out / -o <dir>
-let outDir = '/tmp/short';
+let outDir = '.short';
 for (let i = 0; i < args.length; i++) {
   if ((args[i] === '--out' || args[i] === '-o') && args[i + 1] && !args[i + 1].startsWith('-')) {
     outDir = resolve(args[i + 1]);

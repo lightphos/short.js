@@ -2,7 +2,7 @@ import { copyFile, mkdir, readdir } from 'node:fs/promises';
 import { dirname, extname, relative, resolve } from 'node:path';
 
 const projectRoot = resolve(import.meta.dirname, '..');
-const outputRoot = resolve('/tmp/short');
+const outputRoot = resolve('.short');
 const assetExtensions = new Set(['.js', '.css', '.html']);
 
 async function collectAssets(directory, assets = []) {

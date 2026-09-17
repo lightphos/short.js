@@ -1,13 +1,33 @@
 {
+  "name": "short.js",
+  "version": "1.0.0-beta.1",
+  "description": "A tiny DOM-first JavaScript library and .short app runner.",
   "type": "module",
+  "main": "./short.js",
+  "module": "./short.js",
+  "exports": {
+    ".": "./short.js",
+    "./short.js": "./short.js",
+    "./compile/cmp.mjs": "./.compile/cmp.mjs",
+    "./package.json": "./package.json"
+  },
+  "bin": {
+    "short": "./compile/cmp.mjs"
+  },
+  "files": [
+    "short.js",
+    "compile/cmp.mjs",
+    "README.md",
+    "LICENSE"
+  ],
   "scripts": {
-    "build:st": "node compile/cmp.mjs -o /tmp/short/",
-    "watch:st": "node compile/cmp.mjs -o /tmp/short/ --watch",
-    "tw": "npx @tailwindcss/cli -i ./app/app.tcss -o /tmp/short/app/app.css --watch",
-    "server": "npx http-server /tmp/short/app -p 3000 --cors -c-1",
+    "build:st": "node ./compile/cmp.mjs -o ./.short/",
+    "watch:st": "node ./compile/cmp.mjs -o .short/ --watch",
+    "tw": "npx @tailwindcss/cli -i ./app/app.tcss -o .short/app/app.css --watch",
+    "server": "npx http-server .short/app --port 3000",
     "watch": "concurrently \"npm run tw\" \"npm run watch:st\" \"npm run server\" \"npm run watch:assets\"",
-    "copy:assets": "node compile/copy-assets.mjs",
-    "watch:assets": "npm run copy:assets && onchange \"app/**/*.js\" \"app/**/*.css\" \"app/**/*.html\" \"short.js\" -- node compile/copy-assets.mjs \"{{file}}\"",
+    "copy:assets": "node ./compile/copy-assets.mjs",
+    "watch:assets": "npm run copy:assets && onchange \"app/**/*.js\" \"app/**/*.css\" \"app/**/*.html\" \"short.js\" -- node ./compile/copy-assets.mjs \"{{file}}\"",
     "test": "vitest run",
     "watch:bun": "concurrently \"bun run tw\" \"bun run watch:st\" \"bun run server\" \"bun run watch:assets\"",
     "test:bun": "bun run test"
@@ -22,5 +42,14 @@
     "onchange": "^7.1.0",
     "vitest": "^5.0.1",
     "bun": "^1.4.2"
-  }
+  },
+  "keywords": [
+    "short.js",
+    "components",
+    "dom",
+    "shadow-dom",
+    "templates",
+    "server"
+  ],
+  "license": "MIT"
 }

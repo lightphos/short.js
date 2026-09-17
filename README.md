@@ -178,3 +178,6 @@ sh.txt('Hello, World!')
 ## License
 
 MIT
+
+## Made by
+https://www.reuelworks.com

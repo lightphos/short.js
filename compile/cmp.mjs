@@ -283,6 +283,10 @@ async function compileFile(inputPath, outDir) {
   const outputPath = outDir ? join(outDir, relPath) : relPath;
   mkdirSync(dirname(outputPath), { recursive: true });
 
+  if (inputPath.endsWith('.short')) {
+    return;
+  }
+
   console.log(`Compiling ${relative(projectRoot, inputPath)} → ${outputPath} ...`);
   try {
     const source = readFileSync(inputPath, 'utf8');
@@ -346,6 +350,7 @@ async function startWatch(outDir) {
       return;
     }
 
+    console.log(`Detected ${eventType} in ${filename}, recompiling...`);
     const fullPath = resolve(projectRoot, filename);
     // small debounce
     clearTimeout(startWatch._timer);
@@ -354,6 +359,7 @@ async function startWatch(outDir) {
         // Recompile all .st files that might import this .js
         await buildAll(outDir);
       } else {
+        console.log(`Detected change in ${fullPath}, recompiling...`);
         compileFile(fullPath, outDir);
       }
     }, 100);
@@ -367,7 +373,7 @@ const args = process.argv.slice(2);
 const isWatch = args.includes('--watch') || args.includes('-w');
 
 // Parse --out / -o <dir>
-let outDir = '/tmp/short';
+let outDir = '.short';
 for (let i = 0; i < args.length; i++) {
   if ((args[i] === '--out' || args[i] === '-o') && args[i + 1] && !args[i + 1].startsWith('-')) {
     outDir = resolve(args[i + 1]);
