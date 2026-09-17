@@ -1,94 +1,266 @@
-# short.js
+# Short
 
-A lightweight JavaScript library for building modular web components using Shadow DOM and Web Components API.
+Short is a lightweight JavaScript library for building modular HTML components, a compiler for `.st` templates, and a small CLI for serving `.short` apps.
+
+## Why use Short
+
+Short keeps web UI composition simple:
+
+- build reusable HTML snippets as plain JavaScript functions
+- keep templates readable with `.st` files and component-style exports
+- serve a `.short` app locally without a heavy framework
+- use a minimal, DOM-first toolkit that ships as ES modules
+
+It is a good fit for tiny app shells, prototype UIs, component experiments, and lightweight static-site workflows.
+
+## Quick example
+
+```javascript
+import { inp, btn, tgl } from 'short';
+
+const toggle = tgl({ details: true, panel: false });
+
+const form = `
+  <form>
+    ${inp({ lbl: 'Email', ph: 'you@example.com', ty: 'email' })}
+    ${btn({ txt: 'Save', cls: 'primary' })}
+    ${toggle.init}
+  </form>
+`;
+
+console.log(form);
+```
+
+This pattern lets you assemble UI sections directly from helper functions and compose them with `.st` templates when you want a more structured build flow.
+
+## Beta publish note
+
+This package is currently in beta. Install it with:
+
+```bash
+npm install @reuelworks/short@beta
+```
+
+For a beta npm release, publish with:
+
+```bash
+npm publish --access=public --tag beta
+```
 
 ## Features
 
-- **Modular Components**: Easily create and reuse components.
-- **Shadow DOM**: Encapsulated styles to prevent CSS collisions.
-- **Lightweight**: Minimal footprint for fast loading.
-- **Template-driven**: Simple API for rendering dynamic content.
-- **Helper Utilities**: Convenience functions for common DOM operations.
+- **Component helpers** for DOM-first UI building
+- **Compiler for `.st` files** into static HTML
+- **CLI runner for `.short` apps** with a local dev server
+- **Reactive helpers** such as `tgl()` and `st()`
+- **ES module exports** for browser-side usage
+- **Tailwind-friendly styling** for app templates
 
-## Installation
+## Install
 
-You can include `short.js` directly in your HTML file:
+### From npm (beta)
+
+```bash
+npm install @reuelworks/short@beta
+```
+
+### Local development
+
+```bash
+npm install
+npm test
+```
+
+## Run a `.short` app
+
+Use the CLI with either a `.short` file or a directory of `.short` files.
+
+### From the local repo
+
+```bash
+node ./cli.mjs ./.short --serve --port 3000
+```
+
+### From an installed package
+
+```bash
+npx short ./site.short --serve --port 3000
+```
+
+### Serve a directory
+
+```bash
+npx short ./.short --serve --port 3000
+```
+
+### Compile without serving
+
+```bash
+npx short ./site.short --out ./dist
+```
+
+### Local project helper scripts
+
+```bash
+npm run server
+npm run start
+npm run build:st
+npm run watch:st
+```
+
+## Compile templates
+
+The project includes the compiler in [compile/cmp.mjs](compile/cmp.mjs):
+
+```bash
+node ./compile/cmp.mjs ./app/kit/states.st --out ./dist
+```
+
+Or use the project scripts:
+
+```bash
+npm run build:st
+npm run watch:st
+```
+
+## Template syntax (`.st`)
+
+Create a `.st` file with HTML and a module script:
 
 ```html
-<script type="module" src="./short.js"></script>
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>My App</title>
+    <style src="./app.css"></style>
+  </head>
+  <body>
+    <div id="short">
+      <h1>Welcome</h1>
+      <cmp v="1"></cmp>
+      <mybutton></mybutton>
+    </div>
+  </body>
+
+  <script type="module">
+    import { txt } from './app.js';
+
+    function cmp({ v }) {
+      return `<div>Component: ${v}</div>`;
+    }
+
+    function mybutton() {
+      return `<button>Click me</button>`;
+    }
+
+    return { cmp, mybutton };
+  </script>
+</html>
 ```
 
-## Usage
+### Script features
 
-### Using the `fix` function
+- Import shared utilities with normal ES modules
+- Return a component map from the script
+- Use helper functions from `short` by passing them as `sh`
 
-The `fix` function injects a `div` with id `short-app` the specified content into the document body.
+Example:
+
+```html
+<script type="module">
+  import { inp, btn } from 'short';
+
+  function usr({ sh }) {
+    return `<p>${sh.inp({ lbl: 'Name', ph: 'Enter name' })}</p>`;
+  }
+
+  function sub({ sh }) {
+    return sh.btn({ txt: 'Submit', cls: 'btn-primary' });
+  }
+
+  return { usr, sub };
+</script>
+```
+
+## Helper utilities
+
+The library exposes helpers that are passed to components as `sh`.
+
+### `inp({ lbl, ph, ty, cls })`
+Common input tag short form.
+```javascript
+sh.inp({ lbl: 'Email', ph: 'you@example.com', ty: 'email', cls: 'w-full' })
+```
+
+### `btn({ txt, cls, clk })`
+Button short form.
+```javascript
+sh.btn({ txt: 'Submit', clk: 'handleClick()', cls: 'bg-blue-600' })
+```
+
+### `lnk({ ref, txt, cls })`
+Link (anchor) short form.
+```javascript
+sh.lnk({ ref: '/page', txt: 'Go to Page', cls: 'text-blue-600' })
+```
+
+### `tgl(elements)`
+
+Creates a reactive visibility map for elements, with helper methods to show, hide, and toggle them.
 
 ```javascript
-import { fix } from './short.js';
-
-fix('<h1>Hello, World!</h1>');
+const t = sh.tgl({ hello: true, goodbye: false });
+return `
+  <button onclick="${t.show('hello')}">Show</button>
+  <button onclick="${t.hide('goodbye')}">Hide</button>
+  ${t.init}
+`;
 ```
 
-### Using the `sfix` function
+### `frm({ id, title, fields, cls, hdrCls, action, toggle })`
 
-The `sfix` function creates a custom element `<short-app>` and renders the provided content inside its Shadow DOM.
+Builds a simple form fragment from an array of field strings.
 
 ```javascript
-import { sfix } from './short.js';
-
-sfix('<p>This is rendered inside a Shadow DOM.</p>');
+sh.frm({
+  id: 'signup-form',
+  title: 'Create account',
+  cls: 'space-y-4',
+  hdrCls: 'font-bold',
+  fields: [
+    sh.inp({ lbl: 'Email', ph: 'you@example.com', ty: 'email' }),
+    sh.inp({ lbl: 'Password', ph: '••••••••', ty: 'password' })
+  ],
+  action: 'submitForm()'
+})
 ```
 
-### Helper Utilities
+## Project layout
 
-short.js includes several helper functions for common DOM operations:
-
-#### `lnk({ ref, txt, cls })`
-
-Generates a styled anchor tag.
-
-```javascript
-import { lnk } from './short.js';
-
-const example = lnk({ 
-  ref: 'https://example.com', 
-  txt: 'Click Me', 
-  cls: 'text-blue-600' 
-});
+```text
+├── short.js             # Main library
+├── short-api.js         # Exposed helper API
+├── cli.mjs              # CLI entry for .short apps
+├── compile/
+│   ├── cmp.mjs          # Compiler for `.st` templates
+│   └── copy-assets.mjs
+├── app/                 # Example app assets
+├── tests/               # Vitest checks
+├── package.json
+├── README.md
+└── LICENSE
 ```
 
-#### `btn({ txt, cls, clk })`
+## Development scripts
 
-Generates a clickable button element.
-
-```javascript
-import { btn } from './short.js';
-
-const example = btn({ 
-  txt: 'Submit', 
-  cls: 'bg-blue-600 hover:bg-blue-700', 
-  clk: 'handleSubmit()' 
-});
+```bash
+npm run build:st
+npm run watch:st
+npm run tw
+npm run test
+npm run server
 ```
-
-#### `txt(txts)`
-
-Returns the provided text content.
-
-```javascript
-import { txt } from './short.js';
-
-const example = txt('Hello, World!');
-```
-
-## Project Structure
-
-- `short.js`: Core library with helper utilities (`fix`, `sfix`, `lnk`, `btn`, `txt`).
-- `app/`: Contains application-specific components and logic (`app.js`, `header.js`, `footer.js`, `content.js`).
-- `index.html`: Example implementation.
-- `slots.css` / `slots.html`: Example usage of slots and CSS.
 
 ## License
 
-This project is licensed under the [LICENSE](LICENSE).
+MIT

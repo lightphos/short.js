@@ -1,21 +1,66 @@
 {
+  "name": "@reuelworks/short",
+  "version": "1.0.0-beta.1",
+  "description": "A tiny DOM-first JavaScript library and .short app runner.",
   "type": "module",
+  "main": "./short.js",
+  "module": "./short.js",
+  "exports": {
+    ".": "./short.js",
+    "./short.js": "./short.js",
+    "./cli.mjs": "./cli.mjs",
+    "./package.json": "./package.json"
+  },
+  "bin": {
+    "short": "./cli.mjs",
+    "shortjs": "./cli.mjs"
+  },
+  "files": [
+    "short.js",
+    "short-api.js",
+    "cli.mjs",
+    "compile/",
+    "README.md",
+    "LICENSE"
+  ],
   "scripts": {
-    "build": "node compiler/cmp.mjs",
-    "watch": "node compiler/cmp.mjs --watch",
-    "dev": "npm run watch"
+    "build:st": "node ./compile/cmp.mjs -o ./.short/",
+    "watch:st": "node ./compile/cmp.mjs -o ./.short/ --watch",
+    "tw": "npx @tailwindcss/cli -i ./app/app.tcss -o ./.short/app/app.css --watch",
+    "server": "npx http-server .short/app --port 3000",
+    "start": "node ./cli.mjs ./.short --serve --port 3000",
+    "watch": "concurrently \"npm run tw\" \"npm run watch:st\" \"npm run server\" \"npm run watch:assets\"",
+    "copy:assets": "node ./compile/copy-assets.mjs",
+    "watch:assets": "npm run copy:assets && onchange \"app/**/*.js\" \"app/**/*.css\" \"app/**/*.html\" \"short.js\" -- node ./compile/copy-assets.mjs \"{{file}}\"",
+    "prepack": "npm test",
+    "test": "vitest run",
+    "watch:bun": "concurrently \"bun run tw\" \"bun run watch:st\" \"bun run server\" \"bun run watch:assets\"",
+    "test:bun": "bun run test"
   },
   "dependencies": {
     "@babel/parser": "^8.0.4",
     "@babel/traverse": "^8.0.4",
     "@tailwindcss/cli": "^4.3.3",
-    "parse5": "^8.0.1",
-    "react": "^19.2.8",
-    "react-dom": "^19.2.8",
+    "jsdom": "^30.0.1",
     "tailwindcss": "^4.3.3"
   },
   "devDependencies": {
-    "@babel/core": "^8.0.1",
-    "@babel/preset-react": "^8.0.1"
+    "concurrently": "^10.0.5",
+    "onchange": "^7.1.0",
+    "vitest": "^5.0.1",
+    "bun": "^1.4.2"
+  },
+  "keywords": [
+    "short.js",
+    "components",
+    "dom",
+    "shadow-dom",
+    "templates",
+    "server"
+  ],
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public",
+    "tag": "beta"
   }
 }
