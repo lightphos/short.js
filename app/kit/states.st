@@ -9,7 +9,7 @@
 
        <back></back>
 
-       <banner v="Counter States Banner"></banner>
+       <banner v="States Banner"></banner>
        <p/>
        <div class="mb-5">
         <button class="ct-btn ct-btn-inc" onclick="setSomething('{some: \'one\'}')">
@@ -20,13 +20,13 @@
        
        <span class="ct-btn-group">
           <button class="ct-btn ct-btn-inc" onclick="setCounter(getCounter() + 2)">
-            Set Counter
+            Add 2 to Counter (initial value to 3)
             [<state of="counter" val="3"></state>]
           </button>
        </span>
 
        <p/>
-       <div class="ct-card mt-5">
+       <div class="ct-card mt-5 mb-5">
             <h2 class="ct-title">Count</h2>
             <p class="ct-value">
                 <state of="count"></state>
@@ -40,6 +40,7 @@
                     onclick="setCount(0)">Reset</button>
             </div>
         </div>
+        <p/>
     </div>
 </body>
 
