@@ -9,7 +9,7 @@
 
        <back></back>
 
-       <banner v="Counter Banner"></banner>
+       <banner v="Counter States Banner"></banner>
        <p/>
        <div class="mb-5">
         <button class="ct-btn ct-btn-inc" onclick="setSomething('{some: \'one\'}')">
@@ -46,8 +46,7 @@
 <init></init>
 <script type="module">
     import { state } from '../../short.js';
-    import { back } from '../app.js';
-    import { banner } from './count.js';
+    import { back, banner } from '../app.js';
 
     return { back, banner, state };
 

@@ -42,3 +42,11 @@ export function back() {
         </div>
     `;
 }
+
+export function banner({v}) {
+    return `
+       <h2 class="bg-indigo-100 text-indigo-800  text-4l font-bold text-gray-700 mb-8 text-center">
+        ${v}
+       </h2>
+    `;
+}
