@@ -17,3 +17,6 @@ dev:
 
 watch:
 	npm run watch:st
+
+publish:
+	npm publish --access=public --tag beta

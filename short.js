@@ -135,10 +135,6 @@ export function btn( {txt = null, cls = null, clk = null}) {
     )
 }
 
-export function txt(txts) {
-    return txts;
-}
-
 export function inp({ lbl = null, ph = null, ty = 'text', cls = null }) {
   var str = ' <input type="'+ty+'" '
   if (cls) {
@@ -159,9 +155,20 @@ export function inp({ lbl = null, ph = null, ty = 'text', cls = null }) {
   return (
     str
   )
-
 }
 
+export function frm({ id, title, fields = [], cls = null, hdrCls = null, action = 'submitForm()', toggle = null }) {
+    const fieldHtml = fields.join('\n');
+
+    return `
+        <form id="${id}" class="${cls}">
+            <h2 class="${hdrCls}">${title}</h2>
+            ${fieldHtml}
+            <sub click="${action}"></sub>
+            ${toggle}
+        </form>
+    `;
+}
 
 /* ─────────────────────────────────────────────────────────────
    st(key | state, opts)

@@ -1,5 +1,5 @@
 {
-  "name": "short.js",
+  "name": "@reuelworks/short",
   "version": "1.0.0-beta.1",
   "description": "A tiny DOM-first JavaScript library and .short app runner.",
   "type": "module",
@@ -8,26 +8,31 @@
   "exports": {
     ".": "./short.js",
     "./short.js": "./short.js",
-    "./compile/cmp.mjs": "./.compile/cmp.mjs",
+    "./cli.mjs": "./cli.mjs",
     "./package.json": "./package.json"
   },
   "bin": {
-    "short": "./compile/cmp.mjs"
+    "short": "./cli.mjs",
+    "shortjs": "./cli.mjs"
   },
   "files": [
     "short.js",
-    "compile/cmp.mjs",
+    "short-api.js",
+    "cli.mjs",
+    "compile/",
     "README.md",
     "LICENSE"
   ],
   "scripts": {
     "build:st": "node ./compile/cmp.mjs -o ./.short/",
-    "watch:st": "node ./compile/cmp.mjs -o .short/ --watch",
-    "tw": "npx @tailwindcss/cli -i ./app/app.tcss -o .short/app/app.css --watch",
+    "watch:st": "node ./compile/cmp.mjs -o ./.short/ --watch",
+    "tw": "npx @tailwindcss/cli -i ./app/app.tcss -o ./.short/app/app.css --watch",
     "server": "npx http-server .short/app --port 3000",
+    "start": "node ./cli.mjs ./.short --serve --port 3000",
     "watch": "concurrently \"npm run tw\" \"npm run watch:st\" \"npm run server\" \"npm run watch:assets\"",
     "copy:assets": "node ./compile/copy-assets.mjs",
     "watch:assets": "npm run copy:assets && onchange \"app/**/*.js\" \"app/**/*.css\" \"app/**/*.html\" \"short.js\" -- node ./compile/copy-assets.mjs \"{{file}}\"",
+    "prepack": "npm test",
     "test": "vitest run",
     "watch:bun": "concurrently \"bun run tw\" \"bun run watch:st\" \"bun run server\" \"bun run watch:assets\"",
     "test:bun": "bun run test"
@@ -51,5 +56,9 @@
     "templates",
     "server"
   ],
-  "license": "MIT"
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public",
+    "tag": "beta"
+  }
 }
