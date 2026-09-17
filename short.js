@@ -86,10 +86,11 @@ export function tgl(elements) {
     const id = Math.random().toString(36).slice(2, 8);
     const prop = `__tgl:${id}`;
     const keys = Object.keys(elements);
+    const initialValue = Object.values(elements).includes(false) ? false : true;
 
     const init = `<script>
 (function() {
-    var _val = false;
+    var _val = ${JSON.stringify(initialValue)};
     var _els = ${JSON.stringify(elements)};
     function _sync(v) {
         Object.keys(_els).forEach(function(k) {
@@ -103,7 +104,7 @@ export function tgl(elements) {
         get: function() { return _val; },
         set: function(v) { _val = v; _sync(v); }
     });
-    _sync(false);
+    _sync(_val);
 })();
 <\/script>`;
 

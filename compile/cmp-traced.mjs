@@ -214,58 +214,43 @@ async function runScript(inputPath, source) {
                         parent.insertBefore(tmpBody.firstChild, child);
                     }
                     parent.removeChild(child);
+                } else if (child.nodeType === 3) { // text node
+                    console.log('ALL TEXT NODE:', JSON.stringify(child.textContent).substring(0,100));
+                    const text = child.textContent;
+                    const keys = Object.keys(interpValues);
+                    if (keys.length > 0 && keys.some(k => text.includes(k))) {
+                        const parent = child.parentNode;
+                        const escapedKeys = keys.map(k => k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+                        const re = new RegExp(escapedKeys.join('|'), 'g');
+                        const fragment = parent.ownerDocument.createDocumentFragment();
+                        let lastIndex = 0;
+                        let m;
+                        while ((m = re.exec(text)) !== null) {
+                            if (m.index > lastIndex) {
+                                fragment.appendChild(parent.ownerDocument.createTextNode(text.slice(lastIndex, m.index)));
+                            }
+                            const actual = interpValues[m[0]];
+                            if (typeof actual === 'function') {
+                                fragment.appendChild(parent.ownerDocument.createTextNode(String(actual)));
+                            } else if (typeof actual === 'string' && /<[a-z]/i.test(actual)) {
+                                const tmp = parent.ownerDocument.createElement('div');
+                                tmp.innerHTML = actual;
+                                while (tmp.firstChild) {
+                                    fragment.appendChild(tmp.firstChild);
+                                }
+                            } else {
+                                fragment.appendChild(parent.ownerDocument.createTextNode(String(actual)));
+                            }
+                            lastIndex = re.lastIndex;
+                        }
+                        if (lastIndex < text.length) {
+                            fragment.appendChild(parent.ownerDocument.createTextNode(text.slice(lastIndex)));
+                        }
+                        parent.replaceChild(fragment, child);
+                    }
                 } else {
                     processNode(child);
                 }
-            } else if (child.nodeType === 3) { // text node
-                const text = child.textContent;
-                const keys = Object.keys(interpValues);
-                if (keys.length > 0 && keys.some(k => text.includes(k))) {
-                    const parent = child.parentNode;
-                    const escapedKeys = keys.map(k => k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
-                    const re = new RegExp(escapedKeys.join('|'), 'g');
-                    const fragment = parent.ownerDocument.createDocumentFragment();
-                    let lastIndex = 0;
-                    let m;
-                    while ((m = re.exec(text)) !== null) {
-                        if (m.index > lastIndex) {
-                            fragment.appendChild(parent.ownerDocument.createTextNode(text.slice(lastIndex, m.index)));
-                        }
-                        const actual = interpValues[m[0]];
-                        if (typeof actual === 'function') {
-                            fragment.appendChild(parent.ownerDocument.createTextNode(String(actual)));
-                        } else if (typeof actual === 'string' && /<script\b/i.test(actual)) {
-                            const script = parent.ownerDocument.createElement('script');
-                            const match = actual.match(/<script\b([^>]*)>([\s\S]*?)<\/script>/i);
-                            if (match) {
-                                if (match[1]) {
-                                    const attrs = match[1];
-                                    const typeMatch = attrs.match(/\btype\s*=\s*['"]([^'"]+)['"]/i);
-                                    if (typeMatch) script.type = typeMatch[1];
-                                }
-                                script.textContent = match[2] || '';
-                            } else {
-                                script.textContent = actual;
-                            }
-                            fragment.appendChild(script);
-                        } else if (typeof actual === 'string' && /<[a-z]/i.test(actual)) {
-                            const tmp = parent.ownerDocument.createElement('div');
-                            tmp.innerHTML = actual;
-                            while (tmp.firstChild) {
-                                fragment.appendChild(tmp.firstChild);
-                            }
-                        } else {
-                            fragment.appendChild(parent.ownerDocument.createTextNode(String(actual)));
-                        }
-                        lastIndex = re.lastIndex;
-                    }
-                    if (lastIndex < text.length) {
-                        fragment.appendChild(parent.ownerDocument.createTextNode(text.slice(lastIndex)));
-                    }
-                    parent.replaceChild(fragment, child);
-                }
-            } else {
-                processNode(child);
             }
         }
     }
