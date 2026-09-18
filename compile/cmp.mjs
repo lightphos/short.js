@@ -170,12 +170,12 @@ async function runScript(inputPath, source) {
         for (const child of children) {
             if (child.nodeType === 1) { // element
                 // Resolve interpolation placeholders in all attributes.
-                // Function-valued props must remain callable, so they are stored on the
-                // DOM element itself instead of being coerced into a string attribute.
+                // Non-primitive props must remain values, so they are stored on the DOM
+                // element itself instead of being coerced into string attributes.
                 for (const attr of child.attributes) {
                     if (attr.value in interpValues) {
                         const actual = interpValues[attr.value];
-                        if (typeof actual === 'function') {
+                      if (actual !== null && (typeof actual === 'function' || typeof actual === 'object')) {
                             child[attr.name] = actual;
                         } else {
                             attr.value = actual;

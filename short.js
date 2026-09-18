@@ -135,37 +135,21 @@ export function btn( {txt = null, cls = null, clk = null}) {
     )
 }
 
-export function inp({ lbl = null, ph = null, ty = 'text', cls = null }) {
-  var str = ' <input type="'+ty+'" '
-  if (cls) {
-    str += ' class="'+cls+'"'
-  }
-  if (lbl) {
-    str = '<label>' + lbl + str
-  }
-  if (ph) {
-    str += ' placeholder = "'.concat(ph).concat('"')
-  }
-
-  str += ' />';
-  if (lbl) {
-    str += '</label>';
-  }
-
-  return (
-    str
-  )
+export function inp({ lbl = null, lblcls = null, ph = null, ty = 'text', cls = null }) {
+    const input = `<input type="${ty}" ${cls ? ` class="${cls}"` : ''}  ${ph ? ` placeholder="${ph}"` : ''} />`;
+    return lbl ? `<label ${lblcls ? ` class="${lblcls}"` : ''}>${lbl} ${input}</label>` : input;
 }
 
-export function frm({ id, title, fields = [], cls = null, hdrCls = null, action = 'submitForm()', toggle = null }) {
+export function frm({ id, title, fields = [], postfield=null, cls = null, hdrcls = null, btncls = null, btntxt, btnclk, action = 'submitForm()', toggle = null }) {
     const fieldHtml = fields.join('\n');
 
     return `
         <form id="${id}" class="${cls}">
-            <h2 class="${hdrCls}">${title}</h2>
+            <h2 class="${hdrcls}" >${title}</h2>
             ${fieldHtml}
-            <sub click="${action}"></sub>
-            ${toggle}
+            <button type="submit" onClick="${btnclk || 'submitForm()'}" class="${btncls}">${btntxt ||'Submit'}</button>
+            ${postfield ?? ''}
+            ${toggle ?? ''}
         </form>
     `;
 }
