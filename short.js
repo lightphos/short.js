@@ -126,18 +126,18 @@ export function tgl(elements) {
 /* Helpers */
 
 export function lnk({ ref, txt, cls }) {
-    return (`<a href="${ref}" class="${cls}">${txt}</a>`);
+    return `<a href="${ref}"${cls ? ` class="${cls}"` : ''}>${txt}</a>`;
 }
 
-export function btn( {txt = null, cls = null, clk = null}) {
+export function btn({ txt = null, cls = null, clk = null }) {
     return (
-        `<button type="submit" onClick="${clk}" class="${cls}">${txt}</button>`
-    )
+        `<button type="submit" onClick="${clk || ''}"${cls ? ` class="${cls}"` : ''}>${txt}</button>`
+    );
 }
 
 export function inp({ lbl = null, lblcls = null, ph = null, ty = 'text', cls = null }) {
-    const input = `<input type="${ty}" ${cls ? ` class="${cls}"` : ''}  ${ph ? ` placeholder="${ph}"` : ''} />`;
-    return lbl ? `<label ${lblcls ? ` class="${lblcls}"` : ''}>${lbl} ${input}</label>` : input;
+    const input = `<input type="${ty}"${cls ? ` class="${cls}"` : ''}${ph ? ` placeholder="${ph}"` : ''} />`;
+    return lbl ? `<label${lblcls ? ` class="${lblcls}"` : ''}>${lbl} ${input}</label>` : input;
 }
 
 export function frm({ id, title, fields = [], postfield=null, cls = null, hdrcls = null, btncls = null, btntxt, btnclk, action = 'submitForm()', toggle = null }) {
