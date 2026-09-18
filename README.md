@@ -16,11 +16,15 @@ It is a good fit for tiny app shells, prototype UIs, component experiments, and 
 ## Quick example
 
 ```javascript
-import { inp, btn, tgl } from 'short';
+<body>
+  <sform/>
+</body>
+<script type='module'>
+import { inp, btn, tgl } from '@reuelworks/short';
 
 const toggle = tgl({ details: true, panel: false });
 
-const form = `
+const sform = `
   <form>
     ${inp({ lbl: 'Email', ph: 'you@example.com', ty: 'email' })}
     ${btn({ txt: 'Save', cls: 'primary' })}
@@ -28,7 +32,8 @@ const form = `
   </form>
 `;
 
-console.log(form);
+return { sform }
+</script>
 ```
 
 This pattern lets you assemble UI sections directly from helper functions and compose them with `.st` templates when you want a more structured build flow.

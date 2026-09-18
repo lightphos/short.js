@@ -1,12 +1,12 @@
 #!/usr/bin/env node
 import { readFileSync, writeFileSync, mkdirSync, readdirSync, watch, existsSync, unlinkSync } from 'fs';
 import { resolve, basename, relative, dirname, extname, join } from 'path';
-import { fileURLToPath } from 'node:url';
 import { pathToFileURL } from 'node:url';
 import { JSDOM } from 'jsdom';
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
-const projectRoot = resolve(__dirname, '..'); // assume cmp/ is inside project root
+let projectRoot = process.cwd();
+
+console.log(`short.js compiler running from ${projectRoot}`);
 
 function replaceInterpolations(source, replace) {
   let output = '';
@@ -372,11 +372,20 @@ async function startWatch(outDir) {
 const args = process.argv.slice(2);
 const isWatch = args.includes('--watch') || args.includes('-w');
 
+// Parse --root <dir>
+for (let i = 0; i < args.length; i++) {
+  if ((args[i] === '--root' || args[i] === '-r') && args[i + 1] && !args[i + 1].startsWith('-')) {
+    projectRoot = resolve(args[i + 1]);
+    args.splice(i, 2); // remove so they don't get treated as positional
+    i--;
+  }
+}
+
 // Parse --out / -o <dir>
 let outDir = '.short';
 for (let i = 0; i < args.length; i++) {
   if ((args[i] === '--out' || args[i] === '-o') && args[i + 1] && !args[i + 1].startsWith('-')) {
-    outDir = resolve(args[i + 1]);
+    outDir = resolve(projectRoot, args[i + 1]);
     args.splice(i, 2); // remove so they don't get treated as positional
     i--;
   }
@@ -389,7 +398,7 @@ if (isWatch) {
   await startWatch(outDir);
 } else if (positionalArgs.length > 0 && !positionalArgs[0].startsWith('-')) {
   // single file mode: node cmp/cmp.mjs path/to/file.st
-  await compileFile(resolve(positionalArgs[0]), outDir);
+  await compileFile(resolve(projectRoot, positionalArgs[0]), outDir);
 } else {
   // default: build all
   await buildAll(outDir);
