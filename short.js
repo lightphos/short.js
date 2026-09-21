@@ -81,6 +81,40 @@ export function listen(id, event, handler, options) {
     return element;
 }
 
+export function frmsub(id, handler, options = {}) {
+    const {
+        statusId,
+        resultId,
+        sending = 'Sending...',
+        success = 'Request completed successfully.',
+    } = options;
+    const status = statusId ? elem(statusId) : null;
+    const result = resultId ? elem(resultId) : null;
+
+    return listen(id, 'submit', async (event, form) => {
+        event.preventDefault();
+        const submit = form.querySelector('button[type="submit"]');
+        submit.disabled = true;
+        if (status) status.textContent = sending;
+        if (result) result.classList.add('hidden');
+
+        try {
+            const data = await handler(event, form);
+            if (status) status.textContent = success;
+            if (result) {
+                result.textContent = JSON.stringify(data, null, 2);
+                result.classList.remove('hidden');
+            }
+            return data;
+        } catch (error) {
+            if (status) status.textContent = 'Request failed: ' + error.message;
+            throw error;
+        } finally {
+            submit.disabled = false;
+        }
+    });
+}
+
 export async function request(url, options = {}) {
     const { method = 'GET', body, headers = {}, ...fetchOptions } = options;
     const requestHeaders = new Headers(headers);

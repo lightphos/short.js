@@ -33,44 +33,31 @@
 			<p id="rest-status" class="mt-5 text-sm text-slate-600" role="status"></p>
 			<pre id="rest-result" class="mt-3 hidden overflow-auto rounded-lg bg-slate-900 p-4 text-xs text-cyan-100"></pre>
 		</section>
-		<rest-call></rest-call>
+		<call send="Posting..."/>
 	</div>
 </body>
 </html>
 <script type="module">
 	import { back } from '../../app.js';
 
-	function restCall() {
+	function call({ send }) {
 		return `
 			<script type="module">
-				import { api, elem, listen } from '/short.js';
+				import { api, frmsub } from '/short.js';
 
-				const status = elem('rest-status');
-				const result = elem('rest-result');
-				listen('rest-form', 'submit', async (event, form) => {
-					event.preventDefault();
-					const submit = form.querySelector('button[type="submit"]');
-					submit.disabled = true;
-					status.textContent = 'Sending post...';
-
-					try {
-						const post = await api.post('https://jsonplaceholder.typicode.com/posts', {
+				frmsub('rest-form', (event, form) => api.post('https://jsonplaceholder.typicode.com/posts', {
 							title: form.elements.title.value,
 							body: form.elements.body.value,
 							userId: 1,
-						});
-						status.textContent = 'Post created successfully.';
-						result.textContent = JSON.stringify(post, null, 2);
-						result.classList.remove('hidden');
-					} catch (error) {
-						status.textContent = 'Request failed: ' + error.message;
-					} finally {
-						submit.disabled = false;
-					}
+				}), {
+					statusId: 'rest-status',
+					resultId: 'rest-result',
+					sending: ${JSON.stringify(send)},
+					success: 'Post created successfully.',
 				});
 			<\/script>
 		`;
 	}
 
-	return { 'rest-call': restCall };
+	return { call };
 </script>
