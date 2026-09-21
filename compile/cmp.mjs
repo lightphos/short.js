@@ -136,7 +136,7 @@ async function runScript(inputPath, source) {
                 const objContent = returnObj.replace(/^\{|\}$/g, '').trim();
                 const existingNames = objContent.split(',').map(n => n.trim());
                 const newNames = importNames.filter(n => !existingNames.includes(n));
-                const parts = [objContent, ...newNames];
+                const parts = [objContent, ...newNames].filter(Boolean);
                 return `export default { ${parts.join(', ')} };`;
             }
             return `export default ${returnObj};`;

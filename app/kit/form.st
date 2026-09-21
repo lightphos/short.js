@@ -45,7 +45,5 @@
     import { tgl } from '../../short.js';
 
     const tglf = tgl({ sif: false, suf: true });
-    return {
-        usr, pwd, sub, back, tglf
-    };
+    return { tglf };
 </script>

@@ -22,6 +22,6 @@
     import { menu } from './route.js';
     import { back, banner } from '../../app.js';
 
-    return { menu };
+    return {};
 </script>
 </html>

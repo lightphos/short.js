@@ -72,5 +72,5 @@
 		`;
 	}
 
-	return { back, restCall, 'rest-call': restCall };
+	return { 'rest-call': restCall };
 </script>
