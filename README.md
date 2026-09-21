@@ -187,6 +187,29 @@ frm({
 })
 ```
 
+### `frmsub(id, handler, options)`
+
+Handles the common form submission lifecycle: prevents the default submit,
+disables the submit button, updates status text, renders a JSON result, and
+restores the button after the request completes.
+
+```javascript
+import { api, frmsub } from '@reuelworks/short';
+
+frmsub('rest-form', (event, form) => api.post('/api/users', {
+  name: form.elements.name.value,
+}), {
+  statusId: 'rest-status',
+  resultId: 'rest-result',
+  sending: 'Sending user...',
+  success: 'User created successfully.',
+});
+```
+
+The `handler` receives the submit event and form element. Its returned value is
+serialized into `resultId`. If the request fails, `frmsub` writes the error to
+`statusId` and rethrows it.
+
 ### `api`
 
 Use the REST helper for JSON APIs. `post`, `put`, and `patch` serialize plain
