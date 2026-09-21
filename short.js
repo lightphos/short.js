@@ -68,6 +68,67 @@ export function sfix(txt, cssUrl, elem  = 'short-app') {
     });
 }
 
+export function elem(id) {
+    return document.getElementById(id);
+}
+
+export function listen(id, event, handler, options) {
+    const element = elem(id);
+    if (!element) {
+        throw new Error(`Element not found: ${id}`);
+    }
+    element.addEventListener(event, (eventObject) => handler(eventObject, element), options);
+    return element;
+}
+
+export async function request(url, options = {}) {
+    const { method = 'GET', body, headers = {}, ...fetchOptions } = options;
+    const requestHeaders = new Headers(headers);
+    let requestBody = body;
+
+    const isFormData = typeof FormData !== 'undefined' && body instanceof FormData;
+    const isUrlEncoded = typeof URLSearchParams !== 'undefined' && body instanceof URLSearchParams;
+    const isBlob = typeof Blob !== 'undefined' && body instanceof Blob;
+    if (body !== undefined && body !== null && typeof body !== 'string' && !isFormData && !isUrlEncoded && !isBlob) {
+        requestBody = JSON.stringify(body);
+        if (!requestHeaders.has('Content-Type')) {
+            requestHeaders.set('Content-Type', 'application/json');
+        }
+    }
+
+    const response = await fetch(url, {
+        ...fetchOptions,
+        method,
+        headers: requestHeaders,
+        body: requestBody,
+    });
+    const contentType = response.headers.get('content-type') || '';
+    const responseText = await response.text();
+    const data = contentType.includes('application/json')
+        ? (responseText ? JSON.parse(responseText) : null)
+        : responseText;
+
+    if (!response.ok) {
+        const error = new Error(`Request failed with status ${response.status}`);
+        error.status = response.status;
+        error.statusText = response.statusText;
+        error.data = data;
+        throw error;
+    }
+
+    return data;
+}
+
+export const api = {
+    request,
+    get: (url, options = {}) => request(url, { ...options, method: 'GET' }),
+    post: (url, body, options = {}) => request(url, { ...options, method: 'POST', body }),
+    put: (url, body, options = {}) => request(url, { ...options, method: 'PUT', body }),
+    patch: (url, body, options = {}) => request(url, { ...options, method: 'PATCH', body }),
+    del: (url, options = {}) => request(url, { ...options, method: 'DELETE' }),
+    delete: (url, options = {}) => request(url, { ...options, method: 'DELETE' }),
+};
+
 /* ─────────────────────────────────────────────────────────────
    tgl(key, elements)
    Reactive show/hide toggle.
@@ -344,3 +405,4 @@ export function upds(of, to) {
         : JSON.stringify(to);
     return `window['st:${of}'].set${capitalize(of)}(${value})`;
 }
+

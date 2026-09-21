@@ -65,6 +65,35 @@ function replaceInterpolations(source, replace) {
   return output;
 }
 
+function maskTemplateStrings(source) {
+  let output = '';
+  let quote = null;
+  let escaped = false;
+
+  for (const char of source) {
+    if (quote === '`') {
+      if (escaped) {
+        escaped = false;
+      } else if (char === '\\') {
+        escaped = true;
+      } else if (char === '`') {
+        quote = null;
+      }
+      output += char === '\n' ? '\n' : ' ';
+      continue;
+    }
+
+    if (char === '`') {
+      quote = '`';
+      output += ' ';
+    } else {
+      output += char;
+    }
+  }
+
+  return output;
+}
+
 function compile(sxSource) {
   let html = sxSource;
   // 1. Fix <style src="..."> -> <link rel="stylesheet" href="...">
@@ -94,7 +123,7 @@ async function runScript(inputPath, source) {
     const importRe = /import\s+\{([^}]+)\}\s+from\s+['"][^'"]+['"]/g;
     const importNames = [];
     let m2;
-    while ((m2 = importRe.exec(scriptCode)) !== null) {
+    while ((m2 = importRe.exec(maskTemplateStrings(scriptCode))) !== null) {
         const names = m2[1].split(',').map(n => n.trim());
         importNames.push(...names);
     }

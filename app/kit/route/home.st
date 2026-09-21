@@ -10,6 +10,7 @@
 
 
 <body>
+    <back></back>
     <menu selected="home"></menu>
 
     <br/>
@@ -19,7 +20,7 @@
 
 <script type="module">
     import { menu } from './route.js';
-    import { banner } from '../../app.js';
+    import { back, banner } from '../../app.js';
 
     return { menu };
 </script>

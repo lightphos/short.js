@@ -24,6 +24,7 @@ It is a good fit for tiny app shells, prototype UIs, component experiments, and 
 - **Reactive helpers** for toggles, state and routes
 - **ES module exports** for browser-side usage
 - **Tailwind-friendly styling** for app templates
+- **REST API helper** with JSON request and response handling
 
 ## Install
 
@@ -185,6 +186,25 @@ frm({
   postfield: '<p class="text-sm">Already have an account?</p>'
 })
 ```
+
+### `api`
+
+Use the REST helper for JSON APIs. `post`, `put`, and `patch` serialize plain
+JavaScript values as JSON. Responses are parsed from JSON when the server sets
+an `application/json` content type; other responses are returned as text.
+
+```javascript
+import { api } from '@reuelworks/short';
+
+const user = await api.post('/api/users', { name: 'Ada' });
+const users = await api.get('/api/users');
+await api.put(`/api/users/${user.id}`, { name: 'Ada Lovelace' });
+await api.delete(`/api/users/${user.id}`);
+```
+
+HTTP errors reject with an error containing `status`, `statusText`, and parsed
+response `data` fields. Pass fetch options such as `headers`, `credentials`,
+or `signal` as the final argument to any method.
 
 ## Project layout
 

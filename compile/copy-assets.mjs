@@ -27,7 +27,7 @@ async function copyAsset(sourcePath) {
 const requestedPaths = process.argv.slice(2).filter(Boolean);
 const sourcePaths = requestedPaths.length > 0
   ? requestedPaths.map((filePath) => resolve(projectRoot, filePath))
-  : [resolve(projectRoot, 'short.js'), ...await collectAssets(resolve(projectRoot, 'app'))];
+  : [resolve(projectRoot, 'short.js'), resolve(projectRoot, 'index.html'), ...await collectAssets(resolve(projectRoot, 'app'))];
 
 for (const sourcePath of sourcePaths) {
   try {

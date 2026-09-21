@@ -35,7 +35,7 @@ export function bcmp({v}) {
 export function back() {
     return `
         <div class="max-w-md mx-auto mb-6">
-            <a href="../app.html" class="inline-flex items-center gap-2 text-indigo-600 hover:text-indigo-800 transition">
+            <a href="/index.html" class="inline-flex items-center gap-2 text-indigo-600 hover:text-indigo-800 transition">
                 <span class="text-xl">←</span>
                 <span class="font-medium">Back</span>
             </a>
