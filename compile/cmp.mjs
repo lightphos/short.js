@@ -316,7 +316,7 @@ async function compileFile(inputPath, outDir) {
     return;
   }
 
-  console.log(`Compiling ${relative(projectRoot, inputPath)} → ${outputPath} ...`);
+  //  console.log(`Compiling ${relative(projectRoot, inputPath)} → ${outputPath} ...`);
   try {
     const source = readFileSync(inputPath, 'utf8');
     const rs = await runScript(inputPath, source);
@@ -355,7 +355,7 @@ async function buildAll(outDir) {
     console.log('No .st files found.');
     return;
   }
-  console.log(`Building ${files.length} file(s)...`);
+  // console.log(`Building ${files.length} file(s)...`);
   for (const f of files) {
     await compileFile(f, outDir);
   }
@@ -379,7 +379,7 @@ async function startWatch(outDir) {
       return;
     }
 
-    console.log(`Detected ${eventType} in ${filename}, recompiling...`);
+    // console.log(`Detected ${eventType} in ${filename}, recompiling...`);
     const fullPath = resolve(projectRoot, filename);
     // small debounce
     clearTimeout(startWatch._timer);
@@ -388,7 +388,7 @@ async function startWatch(outDir) {
         // Recompile all .st files that might import this .js
         await buildAll(outDir);
       } else {
-        console.log(`Detected change in ${fullPath}, recompiling...`);
+        // console.log(`Detected change in ${fullPath}, recompiling...`);
         compileFile(fullPath, outDir);
       }
     }, 100);

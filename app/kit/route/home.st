@@ -14,8 +14,9 @@
     <menu selected="home"></menu>
 
     <br/>
+    <h1>Menu Example</h1>
     <banner n="Home"></banner>
-
+   
 </body>
 
 <script type="module">
