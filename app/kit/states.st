@@ -49,6 +49,6 @@
     import { state } from '../../short.js';
     import { back, banner } from '../app.js';
 
-    return { back, banner, state };
+    return { };
 
 </script>

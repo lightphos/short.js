@@ -1,6 +1,9 @@
 # Short
 
-Short is a lightweight JavaScript library for building modular HTML components, a compiler for `.st` templates, and a small CLI for serving `.short` apps.
+Short is a lightweight JavaScript library for building modular HTML components, a compiler for `.st` templates, and a small CLI for serving short apps.
+
+https://github.com/lightphos/short.js
+
 
 ## Why use Short
 
@@ -8,120 +11,68 @@ Short keeps web UI composition simple:
 
 - build reusable HTML snippets as plain JavaScript functions
 - keep templates readable with `.st` files and component-style exports
-- serve a `.short` app locally without a heavy framework
+- serve a short app locally without a heavy framework
 - use a minimal, DOM-first toolkit that ships as ES modules
 
 It is a good fit for tiny app shells, prototype UIs, component experiments, and lightweight static-site workflows.
 
-## Quick example
-
-```javascript
-import { inp, btn, tgl } from 'short';
-
-const toggle = tgl({ details: true, panel: false });
-
-const form = `
-  <form>
-    ${inp({ lbl: 'Email', ph: 'you@example.com', ty: 'email' })}
-    ${btn({ txt: 'Save', cls: 'primary' })}
-    ${toggle.init}
-  </form>
-`;
-
-console.log(form);
-```
-
-This pattern lets you assemble UI sections directly from helper functions and compose them with `.st` templates when you want a more structured build flow.
-
-## Beta publish note
-
-This package is currently in beta. Install it with:
-
-```bash
-npm install @reuelworks/short@beta
-```
-
-For a beta npm release, publish with:
-
-```bash
-npm publish --access=public --tag beta
-```
-
-## Features
+## Feature Summary
 
 - **Component helpers** for DOM-first UI building
 - **Compiler for `.st` files** into static HTML
 - **CLI runner for `.short` apps** with a local dev server
-- **Reactive helpers** such as `tgl()` and `st()`
+- **Reactive helpers** for toggles, state and routes
 - **ES module exports** for browser-side usage
 - **Tailwind-friendly styling** for app templates
+- **REST API helper** with JSON request and response handling
 
 ## Install
 
-### From npm (beta)
+### From npm (current in beta)
 
 ```bash
 npm install @reuelworks/short@beta
 ```
 
-### Local development
+## Run a Short app
+
+### Development
+Assuming the st files are in app directory:
+ 
+With bun (https://bun.com/)
 
 ```bash
-npm install
-npm test
+bunx short --root app --port 3001
 ```
 
-## Run a `.short` app
-
-Use the CLI with either a `.short` file or a directory of `.short` files.
-
-### From the local repo
+### Build distribution
 
 ```bash
-node ./cli.mjs ./.short --serve --port 3000
+bunx short app --root . --out ./dist
 ```
 
-### From an installed package
 
-```bash
-npx short ./site.short --serve --port 3000
+## Quick example
+
+`form.st`
+
+```html
+<html>
+<body>
+  <form>
+    <inp lbl='Username' ph='Enter username' ty='email' cls='frm-inp mb-5'></inp>
+    <inp lbl='Password' ph='Enter password' ty='password' cls='frm-inp mb-5'></inp>
+    <btn txt="Submit" cls="frm-btn" clk="submitForm()"></btn>
+  </form>
+</body>
+<script type="module">
+    import { inp, btn } from '@reuelworks/short';
+    return { inp };
+</script>
+</html>
 ```
 
-### Serve a directory
-
-```bash
-npx short ./.short --serve --port 3000
-```
-
-### Compile without serving
-
-```bash
-npx short ./site.short --out ./dist
-```
-
-### Local project helper scripts
-
-```bash
-npm run server
-npm run start
-npm run build:st
-npm run watch:st
-```
-
-## Compile templates
-
-The project includes the compiler in [compile/cmp.mjs](compile/cmp.mjs):
-
-```bash
-node ./compile/cmp.mjs ./app/kit/states.st --out ./dist
-```
-
-Or use the project scripts:
-
-```bash
-npm run build:st
-npm run watch:st
-```
+This pattern lets you assemble UI sections directly from helper functions and compose them with `.st` templates when you want a more structured and reusable build flow.
 
 ## Template syntax (`.st`)
 
@@ -137,45 +88,41 @@ Create a `.st` file with HTML and a module script:
   <body>
     <div id="short">
       <h1>Welcome</h1>
-      <cmp v="1"></cmp>
-      <mybutton></mybutton>
+      <cmp v="Hello"></cmp>
+      <inp lbl='Name' ph='Enter name' ty='email' cls='mb-5'></inp>
+      <btn txt="Submit" cls="frm-btn" clk="submitForm()"></btn>
     </div>
   </body>
 
   <script type="module">
-    import { txt } from './app.js';
-
+    import { inp, btn } from '@reuelworks/short';
     function cmp({ v }) {
-      return `<div>Component: ${v}</div>`;
+      return `<div>${v}</div>`;
     }
 
-    function mybutton() {
-      return `<button>Click me</button>`;
-    }
-
-    return { cmp, mybutton };
+    return { cmp, btn };
   </script>
 </html>
 ```
 
-### Script features
+### Detailed features
 
 - Import shared utilities with normal ES modules
 - Return a component map from the script
-- Use helper functions from `short` by passing them as `sh`
+- Use helper functions from `short`
 
 Example:
 
 ```html
 <script type="module">
-  import { inp, btn } from 'short';
+  import { inp, btn } from '@reuelworks/short';
 
-  function usr({ sh }) {
-    return `<p>${sh.inp({ lbl: 'Name', ph: 'Enter name' })}</p>`;
+  function usr() {
+    return `<p>${inp({ lbl: 'Name', ph: 'Enter name' })}</p>`;
   }
 
-  function sub({ sh }) {
-    return sh.btn({ txt: 'Submit', cls: 'btn-primary' });
+  function sub() {
+    return btn({ txt: 'Submit', cls: 'btn-primary' });
   }
 
   return { usr, sub };
@@ -187,29 +134,29 @@ Example:
 The library exposes helpers that are passed to components as `sh`.
 
 ### `inp({ lbl, ph, ty, cls })`
-Common input tag short form.
+Input tag short form.
 ```javascript
-sh.inp({ lbl: 'Email', ph: 'you@example.com', ty: 'email', cls: 'w-full' })
+inp({ lbl: 'Email', ph: 'you@example.com', ty: 'email', cls: 'w-full' })
 ```
 
 ### `btn({ txt, cls, clk })`
 Button short form.
 ```javascript
-sh.btn({ txt: 'Submit', clk: 'handleClick()', cls: 'bg-blue-600' })
+btn({ txt: 'Submit', clk: 'handleClick()', cls: 'bg-blue-600' })
 ```
 
 ### `lnk({ ref, txt, cls })`
 Link (anchor) short form.
 ```javascript
-sh.lnk({ ref: '/page', txt: 'Go to Page', cls: 'text-blue-600' })
+lnk({ ref: '/page', txt: 'Go to Page', cls: 'text-blue-600' })
 ```
 
 ### `tgl(elements)`
 
-Creates a reactive visibility map for elements, with helper methods to show, hide, and toggle them.
+Creates a reactive visibility map for elements, with helper methods to show, hide and toggle them.
 
 ```javascript
-const t = sh.tgl({ hello: true, goodbye: false });
+const t = tgl({ hello: true, goodbye: false });
 return `
   <button onclick="${t.show('hello')}">Show</button>
   <button onclick="${t.hide('goodbye')}">Hide</button>
@@ -217,23 +164,70 @@ return `
 `;
 ```
 
-### `frm({ id, title, fields, cls, hdrCls, action, toggle })`
+### `frm({ id, title, fields, postfield, cls, hdrcls, btncls, btntxt, btnclk, action, toggle })`
 
-Builds a simple form fragment from an array of field strings.
+Builds a form fragment from an array of field strings. The optional `postfield` and
+`toggle` content is rendered after the submit button; `null` values render as empty
+strings.
 
 ```javascript
-sh.frm({
+frm({
   id: 'signup-form',
   title: 'Create account',
   cls: 'space-y-4',
-  hdrCls: 'font-bold',
+  hdrcls: 'font-bold',
+  btncls: 'btn-primary',
+  btntxt: 'Create account',
+  btnclk: 'submitForm()',
   fields: [
-    sh.inp({ lbl: 'Email', ph: 'you@example.com', ty: 'email' }),
-    sh.inp({ lbl: 'Password', ph: '••••••••', ty: 'password' })
+    inp({ lbl: 'Email', ph: 'you@example.com', ty: 'email' }),
+    inp({ lbl: 'Password', ty: 'password' })
   ],
-  action: 'submitForm()'
+  postfield: '<p class="text-sm">Already have an account?</p>'
 })
 ```
+
+### `frmsub(id, handler, options)`
+
+Handles the common form submission lifecycle: prevents the default submit,
+disables the submit button, updates status text, renders a JSON result, and
+restores the button after the request completes.
+
+```javascript
+import { api, frmsub } from '@reuelworks/short';
+
+frmsub('rest-form', (event, form) => api.post('/api/users', {
+  name: form.elements.name.value,
+}), {
+  statusId: 'rest-status',
+  resultId: 'rest-result',
+  sending: 'Sending user...',
+  success: 'User created successfully.',
+});
+```
+
+The `handler` receives the submit event and form element. Its returned value is
+serialized into `resultId`. If the request fails, `frmsub` writes the error to
+`statusId` and rethrows it.
+
+### `api`
+
+Use the REST helper for JSON APIs. `post`, `put`, and `patch` serialize plain
+JavaScript values as JSON. Responses are parsed from JSON when the server sets
+an `application/json` content type; other responses are returned as text.
+
+```javascript
+import { api } from '@reuelworks/short';
+
+const user = await api.post('/api/users', { name: 'Ada' });
+const users = await api.get('/api/users');
+await api.put(`/api/users/${user.id}`, { name: 'Ada Lovelace' });
+await api.delete(`/api/users/${user.id}`);
+```
+
+HTTP errors reject with an error containing `status`, `statusText`, and parsed
+response `data` fields. Pass fetch options such as `headers`, `credentials`,
+or `signal` as the final argument to any method.
 
 ## Project layout
 
@@ -249,16 +243,6 @@ sh.frm({
 ├── package.json
 ├── README.md
 └── LICENSE
-```
-
-## Development scripts
-
-```bash
-npm run build:st
-npm run watch:st
-npm run tw
-npm run test
-npm run server
 ```
 
 ## License

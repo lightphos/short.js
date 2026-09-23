@@ -36,6 +36,6 @@
     const tglb = tgl({ bhi: false, bbye: true });
     const tglyn = tgl({ byes: false, bno: true });
     return {
-        back, banner, tglb, tglyn
+        tglb, tglyn
     };
 </script>

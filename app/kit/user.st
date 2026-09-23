@@ -51,7 +51,5 @@
 <script type="module">
     import {back} from '../app.js';
 
-    return {
-        back
-    };
+    return { };
 </script>

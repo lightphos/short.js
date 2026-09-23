@@ -29,6 +29,10 @@
            <a href="./kit/form.html" class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition">Form</a>
            <a href="./kit/states.html" class="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition">States</a>
            <a href="./kit/toggle.html" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition">Toggle</a>
+           <a href="./kit/route/home.html" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">Menu/Nav</a>
+       </nav>       
+       <nav class="mt-10 flex gap-4 justify-center">
+           <a href="./kit/rest/rest.html" class="px-4 py-2 bg-lime-600 text-white rounded-lg hover:bg-lime-700 transition">Rest API</a>
        </nav>
     </div>
 </body>

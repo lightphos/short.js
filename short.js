@@ -68,6 +68,101 @@ export function sfix(txt, cssUrl, elem  = 'short-app') {
     });
 }
 
+export function elem(id) {
+    return document.getElementById(id);
+}
+
+export function listen(id, event, handler, options) {
+    const element = elem(id);
+    if (!element) {
+        throw new Error(`Element not found: ${id}`);
+    }
+    element.addEventListener(event, (eventObject) => handler(eventObject, element), options);
+    return element;
+}
+
+export function frmsub(id, handler, options = {}) {
+    const {
+        statusId,
+        resultId,
+        sending = 'Sending...',
+        success = 'Request completed successfully.',
+    } = options;
+    const status = statusId ? elem(statusId) : null;
+    const result = resultId ? elem(resultId) : null;
+
+    return listen(id, 'submit', async (event, form) => {
+        event.preventDefault();
+        const submit = form.querySelector('button[type="submit"]');
+        submit.disabled = true;
+        if (status) status.textContent = sending;
+        if (result) result.classList.add('hidden');
+
+        try {
+            const data = await handler(event, form);
+            if (status) status.textContent = success;
+            if (result) {
+                result.textContent = JSON.stringify(data, null, 2);
+                result.classList.remove('hidden');
+            }
+            return data;
+        } catch (error) {
+            if (status) status.textContent = 'Request failed: ' + error.message;
+            throw error;
+        } finally {
+            submit.disabled = false;
+        }
+    });
+}
+
+export async function request(url, options = {}) {
+    const { method = 'GET', body, headers = {}, ...fetchOptions } = options;
+    const requestHeaders = new Headers(headers);
+    let requestBody = body;
+
+    const isFormData = typeof FormData !== 'undefined' && body instanceof FormData;
+    const isUrlEncoded = typeof URLSearchParams !== 'undefined' && body instanceof URLSearchParams;
+    const isBlob = typeof Blob !== 'undefined' && body instanceof Blob;
+    if (body !== undefined && body !== null && typeof body !== 'string' && !isFormData && !isUrlEncoded && !isBlob) {
+        requestBody = JSON.stringify(body);
+        if (!requestHeaders.has('Content-Type')) {
+            requestHeaders.set('Content-Type', 'application/json');
+        }
+    }
+
+    const response = await fetch(url, {
+        ...fetchOptions,
+        method,
+        headers: requestHeaders,
+        body: requestBody,
+    });
+    const contentType = response.headers.get('content-type') || '';
+    const responseText = await response.text();
+    const data = contentType.includes('application/json')
+        ? (responseText ? JSON.parse(responseText) : null)
+        : responseText;
+
+    if (!response.ok) {
+        const error = new Error(`Request failed with status ${response.status}`);
+        error.status = response.status;
+        error.statusText = response.statusText;
+        error.data = data;
+        throw error;
+    }
+
+    return data;
+}
+
+export const api = {
+    request,
+    get: (url, options = {}) => request(url, { ...options, method: 'GET' }),
+    post: (url, body, options = {}) => request(url, { ...options, method: 'POST', body }),
+    put: (url, body, options = {}) => request(url, { ...options, method: 'PUT', body }),
+    patch: (url, body, options = {}) => request(url, { ...options, method: 'PATCH', body }),
+    del: (url, options = {}) => request(url, { ...options, method: 'DELETE' }),
+    delete: (url, options = {}) => request(url, { ...options, method: 'DELETE' }),
+};
+
 /* ─────────────────────────────────────────────────────────────
    tgl(key, elements)
    Reactive show/hide toggle.
@@ -126,46 +221,30 @@ export function tgl(elements) {
 /* Helpers */
 
 export function lnk({ ref, txt, cls }) {
-    return (`<a href="${ref}" class="${cls}">${txt}</a>`);
+    return `<a href="${ref}"${cls ? ` class="${cls}"` : ''}>${txt}</a>`;
 }
 
-export function btn( {txt = null, cls = null, clk = null}) {
+export function btn({ txt = null, cls = null, clk = null }) {
     return (
-        `<button type="submit" onClick="${clk}" class="${cls}">${txt}</button>`
-    )
+        `<button type="submit" onClick="${clk || ''}"${cls ? ` class="${cls}"` : ''}>${txt}</button>`
+    );
 }
 
-export function inp({ lbl = null, ph = null, ty = 'text', cls = null }) {
-  var str = ' <input type="'+ty+'" '
-  if (cls) {
-    str += ' class="'+cls+'"'
-  }
-  if (lbl) {
-    str = '<label>' + lbl + str
-  }
-  if (ph) {
-    str += ' placeholder = "'.concat(ph).concat('"')
-  }
-
-  str += ' />';
-  if (lbl) {
-    str += '</label>';
-  }
-
-  return (
-    str
-  )
+export function inp({ lbl = null, lblcls = null, ph = null, ty = 'text', cls = null }) {
+    const input = `<input type="${ty}"${cls ? ` class="${cls}"` : ''}${ph ? ` placeholder="${ph}"` : ''} />`;
+    return lbl ? `<label${lblcls ? ` class="${lblcls}"` : ''}>${lbl} ${input}</label>` : input;
 }
 
-export function frm({ id, title, fields = [], cls = null, hdrCls = null, action = 'submitForm()', toggle = null }) {
+export function frm({ id, title, fields = [], postfield=null, cls = null, hdrcls = null, btncls = null, btntxt, btnclk, action = 'submitForm()', toggle = null }) {
     const fieldHtml = fields.join('\n');
 
     return `
         <form id="${id}" class="${cls}">
-            <h2 class="${hdrCls}">${title}</h2>
+            <h2 class="${hdrcls}" >${title}</h2>
             ${fieldHtml}
-            <sub click="${action}"></sub>
-            ${toggle}
+            <button type="submit" onClick="${btnclk || 'submitForm()'}" class="${btncls}">${btntxt ||'Submit'}</button>
+            ${postfield ?? ''}
+            ${toggle ?? ''}
         </form>
     `;
 }
@@ -360,3 +439,4 @@ export function upds(of, to) {
         : JSON.stringify(to);
     return `window['st:${of}'].set${capitalize(of)}(${value})`;
 }
+

@@ -1,12 +1,12 @@
 #!/usr/bin/env node
 import { readFileSync, writeFileSync, mkdirSync, readdirSync, watch, existsSync, unlinkSync } from 'fs';
 import { resolve, basename, relative, dirname, extname, join } from 'path';
-import { fileURLToPath } from 'node:url';
 import { pathToFileURL } from 'node:url';
 import { JSDOM } from 'jsdom';
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
-const projectRoot = resolve(__dirname, '..'); // assume cmp/ is inside project root
+let projectRoot = process.cwd();
+
+console.log(`short.js compiler running from ${projectRoot}`);
 
 function replaceInterpolations(source, replace) {
   let output = '';
@@ -65,6 +65,35 @@ function replaceInterpolations(source, replace) {
   return output;
 }
 
+function maskTemplateStrings(source) {
+  let output = '';
+  let quote = null;
+  let escaped = false;
+
+  for (const char of source) {
+    if (quote === '`') {
+      if (escaped) {
+        escaped = false;
+      } else if (char === '\\') {
+        escaped = true;
+      } else if (char === '`') {
+        quote = null;
+      }
+      output += char === '\n' ? '\n' : ' ';
+      continue;
+    }
+
+    if (char === '`') {
+      quote = '`';
+      output += ' ';
+    } else {
+      output += char;
+    }
+  }
+
+  return output;
+}
+
 function compile(sxSource) {
   let html = sxSource;
   // 1. Fix <style src="..."> -> <link rel="stylesheet" href="...">
@@ -94,7 +123,7 @@ async function runScript(inputPath, source) {
     const importRe = /import\s+\{([^}]+)\}\s+from\s+['"][^'"]+['"]/g;
     const importNames = [];
     let m2;
-    while ((m2 = importRe.exec(scriptCode)) !== null) {
+    while ((m2 = importRe.exec(maskTemplateStrings(scriptCode))) !== null) {
         const names = m2[1].split(',').map(n => n.trim());
         importNames.push(...names);
     }
@@ -107,7 +136,7 @@ async function runScript(inputPath, source) {
                 const objContent = returnObj.replace(/^\{|\}$/g, '').trim();
                 const existingNames = objContent.split(',').map(n => n.trim());
                 const newNames = importNames.filter(n => !existingNames.includes(n));
-                const parts = [objContent, ...newNames];
+                const parts = [objContent, ...newNames].filter(Boolean);
                 return `export default { ${parts.join(', ')} };`;
             }
             return `export default ${returnObj};`;
@@ -170,12 +199,12 @@ async function runScript(inputPath, source) {
         for (const child of children) {
             if (child.nodeType === 1) { // element
                 // Resolve interpolation placeholders in all attributes.
-                // Function-valued props must remain callable, so they are stored on the
-                // DOM element itself instead of being coerced into a string attribute.
+                // Non-primitive props must remain values, so they are stored on the DOM
+                // element itself instead of being coerced into string attributes.
                 for (const attr of child.attributes) {
                     if (attr.value in interpValues) {
                         const actual = interpValues[attr.value];
-                        if (typeof actual === 'function') {
+                      if (actual !== null && (typeof actual === 'function' || typeof actual === 'object')) {
                             child[attr.name] = actual;
                         } else {
                             attr.value = actual;
@@ -287,7 +316,7 @@ async function compileFile(inputPath, outDir) {
     return;
   }
 
-  console.log(`Compiling ${relative(projectRoot, inputPath)} → ${outputPath} ...`);
+  //  console.log(`Compiling ${relative(projectRoot, inputPath)} → ${outputPath} ...`);
   try {
     const source = readFileSync(inputPath, 'utf8');
     const rs = await runScript(inputPath, source);
@@ -326,7 +355,7 @@ async function buildAll(outDir) {
     console.log('No .st files found.');
     return;
   }
-  console.log(`Building ${files.length} file(s)...`);
+  // console.log(`Building ${files.length} file(s)...`);
   for (const f of files) {
     await compileFile(f, outDir);
   }
@@ -350,7 +379,7 @@ async function startWatch(outDir) {
       return;
     }
 
-    console.log(`Detected ${eventType} in ${filename}, recompiling...`);
+    // console.log(`Detected ${eventType} in ${filename}, recompiling...`);
     const fullPath = resolve(projectRoot, filename);
     // small debounce
     clearTimeout(startWatch._timer);
@@ -359,7 +388,7 @@ async function startWatch(outDir) {
         // Recompile all .st files that might import this .js
         await buildAll(outDir);
       } else {
-        console.log(`Detected change in ${fullPath}, recompiling...`);
+        // console.log(`Detected change in ${fullPath}, recompiling...`);
         compileFile(fullPath, outDir);
       }
     }, 100);
@@ -372,11 +401,20 @@ async function startWatch(outDir) {
 const args = process.argv.slice(2);
 const isWatch = args.includes('--watch') || args.includes('-w');
 
+// Parse --root <dir>
+for (let i = 0; i < args.length; i++) {
+  if ((args[i] === '--root' || args[i] === '-r') && args[i + 1] && !args[i + 1].startsWith('-')) {
+    projectRoot = resolve(args[i + 1]);
+    args.splice(i, 2); // remove so they don't get treated as positional
+    i--;
+  }
+}
+
 // Parse --out / -o <dir>
 let outDir = '.short';
 for (let i = 0; i < args.length; i++) {
   if ((args[i] === '--out' || args[i] === '-o') && args[i + 1] && !args[i + 1].startsWith('-')) {
-    outDir = resolve(args[i + 1]);
+    outDir = resolve(projectRoot, args[i + 1]);
     args.splice(i, 2); // remove so they don't get treated as positional
     i--;
   }
@@ -389,7 +427,7 @@ if (isWatch) {
   await startWatch(outDir);
 } else if (positionalArgs.length > 0 && !positionalArgs[0].startsWith('-')) {
   // single file mode: node cmp/cmp.mjs path/to/file.st
-  await compileFile(resolve(positionalArgs[0]), outDir);
+  await compileFile(resolve(projectRoot, positionalArgs[0]), outDir);
 } else {
   // default: build all
   await buildAll(outDir);

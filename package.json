@@ -1,6 +1,6 @@
 {
   "name": "@reuelworks/short",
-  "version": "1.0.0-beta.1",
+  "version": "1.0.0-beta.6",
   "description": "A tiny DOM-first JavaScript library and .short app runner.",
   "type": "module",
   "main": "./short.js",
@@ -25,30 +25,31 @@
   ],
   "scripts": {
     "build:st": "node ./compile/cmp.mjs -o ./.short/",
-    "watch:st": "node ./compile/cmp.mjs -o ./.short/ --watch",
+    "cmp": "node ./compile/cmp.mjs -o ./.short/ --watch",
     "tw": "npx @tailwindcss/cli -i ./app/app.tcss -o ./.short/app/app.css --watch",
-    "server": "npx http-server .short/app --port 3000",
+    "server": "serve .short",
     "start": "node ./cli.mjs ./.short --serve --port 3000",
-    "watch": "concurrently \"npm run tw\" \"npm run watch:st\" \"npm run server\" \"npm run watch:assets\"",
+    "dev": "npm-run-all --parallel tw cmp copy:assets server",
     "copy:assets": "node ./compile/copy-assets.mjs",
-    "watch:assets": "npm run copy:assets && onchange \"app/**/*.js\" \"app/**/*.css\" \"app/**/*.html\" \"short.js\" -- node ./compile/copy-assets.mjs \"{{file}}\"",
+    "watch:assets": "npm run copy:assets && onchange index.html \"app/**/*.js\" \"app/**/*.css\" \"app/**/*.html\" \"short.js\" -- node ./compile/copy-assets.mjs \"{{file}}\"",
     "prepack": "npm test",
-    "test": "vitest run",
-    "watch:bun": "concurrently \"bun run tw\" \"bun run watch:st\" \"bun run server\" \"bun run watch:assets\"",
-    "test:bun": "bun run test"
+    "test": "vitest run"
   },
   "dependencies": {
     "@babel/parser": "^8.0.4",
     "@babel/traverse": "^8.0.4",
     "@tailwindcss/cli": "^4.3.3",
     "jsdom": "^30.0.1",
+    "npm-run-all": "^4.1.5",
     "tailwindcss": "^4.3.3"
   },
   "devDependencies": {
+    "bun": "^1.4.2",
     "concurrently": "^10.0.5",
+    "http-server": "^14.1.1",
     "onchange": "^7.1.0",
-    "vitest": "^5.0.1",
-    "bun": "^1.4.2"
+    "serve": "^14.2.6",
+    "vitest": "^5.0.1"
   },
   "keywords": [
     "short.js",
