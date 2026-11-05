@@ -1,9 +1,18 @@
 import { copyFile, mkdir, readdir } from 'node:fs/promises';
-import { dirname, extname, relative, resolve } from 'node:path';
+import { basename, dirname, extname, relative, resolve } from 'node:path';
 
 const projectRoot = resolve(import.meta.dirname, '..');
-const outputRoot = resolve('.short');
 const assetExtensions = new Set(['.js', '.css', '.html']);
+
+const args = process.argv.slice(2);
+let outputRoot = '.short';
+for (let i = 0; i < args.length; i++) {
+  if ((args[i] === '--out' || args[i] === '-o') && args[i + 1] && !args[i + 1].startsWith('-')) {
+    outputRoot = resolve(projectRoot, args[i + 1]);
+    args.splice(i, 2); // remove so they don't get treated as positional
+    i--;
+  }
+}
 
 async function collectAssets(directory, assets = []) {
   for (const entry of await readdir(directory, { withFileTypes: true })) {
@@ -20,6 +29,15 @@ async function collectAssets(directory, assets = []) {
 async function copyAsset(sourcePath) {
   const relativePath = relative(projectRoot, sourcePath);
   const destinationPath = resolve(outputRoot, relativePath);
+
+  // Special handling: if source is short.js, place it in app/ directory
+  if (basename(sourcePath) === 'short.js' && !relativePath.startsWith('app/')) {
+    const destinationPath = resolve(outputRoot, 'app', 'short.js');
+    await mkdir(dirname(destinationPath), { recursive: true });
+    await copyFile(sourcePath, destinationPath);
+    return;
+  }
+
   await mkdir(dirname(destinationPath), { recursive: true });
   await copyFile(sourcePath, destinationPath);
 }
@@ -27,7 +45,7 @@ async function copyAsset(sourcePath) {
 const requestedPaths = process.argv.slice(2).filter(Boolean);
 const sourcePaths = requestedPaths.length > 0
   ? requestedPaths.map((filePath) => resolve(projectRoot, filePath))
-  : [resolve(projectRoot, 'short.js'), resolve(projectRoot, 'index.html'), ...await collectAssets(resolve(projectRoot, 'app'))];
+  : [resolve(projectRoot, 'short.js'), ...await collectAssets(resolve(projectRoot, 'app'))];
 
 for (const sourcePath of sourcePaths) {
   try {

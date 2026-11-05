@@ -145,8 +145,8 @@ async function compileDirectory(dirPath, outDir, root) {
     const rel = file.slice(sourceDir.length).replace(/^[\\/]+/, '');
     const destDir = rel ? join(targetDir, dirname(rel)) : targetDir;
     mkdirSync(destDir, { recursive: true });
-    execFileSync(process.execPath, [compiler, file, '--root', sourceDir, '--out', destDir], { cwd, stdio: 'inherit' });
-    const compiled = join(destDir, `${parsed}.html`);
+    execFileSync(process.execPath, [compiler, file, '--root', root, '--out', targetDir], { cwd, stdio: 'inherit' });
+    const compiled = join(targetDir, relative(root, file).replace(/\.st$/i, '.html'));
     if (!existsSync(compiled)) {
       throw new Error(`Compilation did not produce ${compiled}`);
     }

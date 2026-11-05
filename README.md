@@ -39,16 +39,14 @@ npm install @reuelworks/short@beta
 ### Development
 Assuming the st files are in app directory:
  
-With bun (https://bun.com/)
-
 ```bash
-bunx short --root app --port 3001
+npm run dev
 ```
 
 ### Build distribution
 
 ```bash
-bunx short app --root . --out ./dist
+npm run dist
 ```
 
 

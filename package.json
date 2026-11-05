@@ -24,27 +24,22 @@
     "LICENSE"
   ],
   "scripts": {
-    "build:st": "node ./compile/cmp.mjs -o ./.short/",
     "cmp": "node ./compile/cmp.mjs -o ./.short/ --watch",
-    "tw": "npx @tailwindcss/cli -i ./app/app.tcss -o ./.short/app/app.css --watch",
-    "server": "serve .short",
-    "start": "node ./cli.mjs ./.short --serve --port 3000",
-    "dev": "npm-run-all --parallel tw cmp copy:assets server",
+    "tw": "npx @tailwindcss/cli -i ./app/app.tcss -o ./.short/app/app.css --silent --watch",
+    "server": "serve .short/app",
     "copy:assets": "node ./compile/copy-assets.mjs",
-    "watch:assets": "npm run copy:assets && onchange index.html \"app/**/*.js\" \"app/**/*.css\" \"app/**/*.html\" \"short.js\" -- node ./compile/copy-assets.mjs \"{{file}}\"",
-    "prepack": "npm test",
+    "dist": "npm run copy:assets -o ./dist && node ./compile/cmp.mjs -o ./dist/",
+    "watch:assets": "npm run copy:assets && onchange \"app/**/*.js\" \"app/**/*.css\" \"app/**/*.html\" \"short.js\" -- node ./compile/copy-assets.mjs \"{{file}}\"",
+    "dev": "npm-run-all --parallel tw cmp watch:assets server",
     "test": "vitest run"
   },
   "dependencies": {
     "@tailwindcss/cli": "^4.3.3",
-    "jsdom": "^30.0.1",
+    "jsdom": "^30.1.1",
     "npm-run-all": "^4.1.5",
     "tailwindcss": "^4.3.3"
   },
   "devDependencies": {
-    "bun": "^1.4.2",
-    "concurrently": "^10.0.5",
-    "http-server": "^14.1.1",
     "onchange": "^7.1.0",
     "serve": "^14.2.6",
     "vitest": "^5.0.1"
